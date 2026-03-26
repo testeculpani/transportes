@@ -6,6 +6,7 @@
   <title>Gestão de Transportes</title>
 
   <script src="https://widget.cloudinary.com/v2.0/global/all.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
   <style>
@@ -37,7 +38,7 @@
 
     .app-shell{
       width:100%;
-      max-width:780px;
+      max-width:860px;
       margin:0 auto;
       padding:18px 14px 24px;
     }
@@ -50,14 +51,14 @@
 
     .topbar h1{
       margin:0;
-      font-size:24px;
+      font-size:26px;
       font-weight:800;
       letter-spacing:.2px;
     }
 
     .topbar p{
       margin:6px 0 0;
-      opacity:.95;
+      opacity:.96;
       font-size:14px;
     }
 
@@ -133,6 +134,11 @@
       box-shadow:0 0 0 4px rgba(14,165,233,.12);
     }
 
+    textarea{
+      resize:vertical;
+      min-height:90px;
+    }
+
     .btn-row{
       display:flex;
       gap:10px;
@@ -176,6 +182,12 @@
       flex:1;
     }
 
+    .btn-danger{
+      background:linear-gradient(180deg,#ef4444,#dc2626);
+      color:#fff;
+      flex:1;
+    }
+
     .btn-outline{
       background:#fff;
       color:var(--primary-dark);
@@ -190,8 +202,8 @@
 
     .login-card{
       text-align:center;
-      padding-top:22px;
-      padding-bottom:22px;
+      padding-top:24px;
+      padding-bottom:24px;
     }
 
     .login-card h2{
@@ -471,26 +483,86 @@
       font-weight:700;
       font-size:12px;
     }
+
+    .subtabs{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:8px;
+    }
+
+    .tab-btn{
+      border:none;
+      border-radius:12px;
+      padding:10px 14px;
+      font-size:14px;
+      font-weight:800;
+      cursor:pointer;
+      background:#e0f2fe;
+      color:#0369a1;
+    }
+
+    .tab-btn.active{
+      background:linear-gradient(180deg,#22c1ff,#0ea5e9);
+      color:#fff;
+    }
+
+    .tab-content.hidden{
+      display:none;
+    }
+
+    .tab-content.active{
+      display:block;
+    }
+
+    .cad-item{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:center;
+      padding:12px 0;
+      border-bottom:1px solid var(--line);
+    }
+
+    .cad-item:last-child{
+      border-bottom:none;
+    }
+
+    .cad-title{
+      font-weight:800;
+      font-size:15px;
+    }
+
+    .chart-wrap{
+      margin-top:12px;
+      background:#fff;
+      border-radius:16px;
+      padding:14px;
+      border:1px solid #e2e8f0;
+    }
   </style>
 </head>
 <body>
   <div class="app-shell">
     <div class="topbar">
       <h1>🚛 Gestão de Transportes</h1>
-      <p>Operação, conferência financeira, divergências e aprovação</p>
+      <p>Operação, cadastros, financeiro e relatórios</p>
     </div>
 
     <section id="loginScreen" class="screen active">
       <div class="card login-card">
         <h2>Acesso ao Sistema</h2>
-        <p class="subtle">Escolha o perfil para entrar</p>
+        <p class="subtle">Escolha o painel que deseja abrir</p>
 
         <div class="btn-row">
-          <button type="button" id="btnOperador" class="btn btn-primary" onclick="window.abrirOperador()">
+          <button type="button" class="btn btn-primary" onclick="window.abrirOperador()">
             <i class="fa-solid fa-truck-fast"></i> Operador
           </button>
-          <button type="button" id="btnGestor" class="btn btn-dark" onclick="window.abrirGestor()">
-            <i class="fa-solid fa-chart-line"></i> Gestor
+          <button type="button" class="btn btn-dark" onclick="window.abrirGestor()">
+            <i class="fa-solid fa-user-shield"></i> Gestor
+          </button>
+          <button type="button" class="btn btn-success" onclick="window.abrirRelatorios()">
+            <i class="fa-solid fa-chart-column"></i> Relatórios
           </button>
         </div>
       </div>
@@ -504,62 +576,132 @@
       </div>
 
       <div class="card">
-        <h3 class="section-title">Nova Viagem</h3>
+        <h3 class="section-title">Painel do Operador</h3>
 
-        <div class="grid-2">
-          <div>
-            <label for="motorista">Motorista</label>
-            <input id="motorista" placeholder="Nome do motorista" />
-          </div>
-          <div>
-            <label for="frete">Valor do frete</label>
-            <input id="frete" type="number" step="0.01" placeholder="0,00" />
-          </div>
+        <div class="subtabs">
+          <button class="tab-btn active" id="tabBtnViagens" onclick="window.abrirTabOperador('viagens')">Viagens</button>
+          <button class="tab-btn" id="tabBtnMotoristas" onclick="window.abrirTabOperador('motoristas')">Motoristas</button>
+          <button class="tab-btn" id="tabBtnCaminhoes" onclick="window.abrirTabOperador('caminhoes')">Caminhões</button>
         </div>
 
-        <div class="grid-2">
-          <div>
-            <label for="origem">Cidade de origem</label>
-            <input id="origem" placeholder="Cidade origem" />
+        <div id="tabViagens" class="tab-content active">
+          <div class="divider"></div>
+
+          <div class="grid-2">
+            <div>
+              <label for="selectMotoristaViagem">Motorista</label>
+              <select id="selectMotoristaViagem"></select>
+            </div>
+            <div>
+              <label for="selectCaminhaoViagem">Caminhão</label>
+              <select id="selectCaminhaoViagem"></select>
+            </div>
           </div>
-          <div>
-            <label for="destino">Cidade de destino</label>
-            <input id="destino" placeholder="Cidade destino" />
+
+          <div class="grid-2">
+            <div>
+              <label for="frete">Valor do frete</label>
+              <input id="frete" type="number" step="0.01" placeholder="0,00" />
+            </div>
+            <div>
+              <label for="origem">Cidade de origem</label>
+              <input id="origem" placeholder="Cidade origem" />
+            </div>
           </div>
+
+          <div class="grid-2">
+            <div>
+              <label for="destino">Cidade de destino</label>
+              <input id="destino" placeholder="Cidade destino" />
+            </div>
+            <div>
+              <label for="localCarga">Local de carregamento</label>
+              <input id="localCarga" placeholder="Empresa / endereço" />
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div>
+              <label for="dataCarga">Data e hora do carregamento</label>
+              <input id="dataCarga" type="datetime-local" />
+            </div>
+            <div>
+              <label for="localDescarga">Local de descarregamento</label>
+              <input id="localDescarga" placeholder="Cliente / endereço" />
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div>
+              <label for="dataDescarga">Data e hora do descarregamento</label>
+              <input id="dataDescarga" type="datetime-local" />
+            </div>
+          </div>
+
+          <div class="btn-row">
+            <button type="button" class="btn btn-primary" onclick="window.criarViagem()">
+              <i class="fa-solid fa-plus"></i> Criar viagem
+            </button>
+          </div>
+
+          <div class="divider"></div>
+          <h3 class="section-title">Viagens cadastradas</h3>
+          <div id="listaOperador"></div>
         </div>
 
-        <div class="grid-2">
-          <div>
-            <label for="localCarga">Local de carregamento</label>
-            <input id="localCarga" placeholder="Empresa / endereço" />
+        <div id="tabMotoristas" class="tab-content hidden">
+          <div class="divider"></div>
+          <h3 class="section-title">Cadastro de Motoristas</h3>
+
+          <div class="grid-2">
+            <div>
+              <label for="motoristaNome">Nome</label>
+              <input id="motoristaNome" placeholder="Nome do motorista" />
+            </div>
+            <div>
+              <label for="motoristaTelefone">Telefone</label>
+              <input id="motoristaTelefone" placeholder="Telefone" />
+            </div>
           </div>
-          <div>
-            <label for="dataCarga">Data e hora do carregamento</label>
-            <input id="dataCarga" type="datetime-local" />
+
+          <div class="btn-row">
+            <button type="button" class="btn btn-primary" onclick="window.criarMotorista()">
+              <i class="fa-solid fa-user-plus"></i> Salvar motorista
+            </button>
           </div>
+
+          <div class="divider"></div>
+          <div id="listaMotoristas"></div>
         </div>
 
-        <div class="grid-2">
-          <div>
-            <label for="localDescarga">Local de descarregamento</label>
-            <input id="localDescarga" placeholder="Cliente / endereço" />
-          </div>
-          <div>
-            <label for="dataDescarga">Data e hora do descarregamento</label>
-            <input id="dataDescarga" type="datetime-local" />
-          </div>
-        </div>
+        <div id="tabCaminhoes" class="tab-content hidden">
+          <div class="divider"></div>
+          <h3 class="section-title">Cadastro de Caminhões</h3>
 
-        <div class="btn-row">
-          <button type="button" class="btn btn-primary" onclick="window.criarViagem()">
-            <i class="fa-solid fa-plus"></i> Criar viagem
-          </button>
-        </div>
-      </div>
+          <div class="grid-3">
+            <div>
+              <label for="caminhaoPlaca">Placa</label>
+              <input id="caminhaoPlaca" placeholder="ABC1D23" />
+            </div>
+            <div>
+              <label for="caminhaoModelo">Modelo</label>
+              <input id="caminhaoModelo" placeholder="Volvo FH" />
+            </div>
+            <div>
+              <label for="caminhaoDescricao">Descrição</label>
+              <input id="caminhaoDescricao" placeholder="Ex: 9 eixos" />
+            </div>
+          </div>
 
-      <div class="card">
-        <h3 class="section-title">Viagens do Operador</h3>
-        <div id="listaOperador"></div>
+          <div class="btn-row">
+            <button type="button" class="btn btn-primary" onclick="window.criarCaminhao()">
+              <i class="fa-solid fa-truck"></i> Salvar caminhão
+            </button>
+          </div>
+
+          <div class="divider"></div>
+          <div id="listaCaminhoes"></div>
+        </div>
       </div>
     </section>
 
@@ -616,6 +758,41 @@
       </div>
     </section>
 
+    <section id="reportsScreen" class="screen hidden">
+      <div class="top-actions">
+        <button type="button" class="btn btn-outline back-btn" onclick="window.voltarAoLogin()">
+          <i class="fa-solid fa-arrow-left"></i> Sair
+        </button>
+      </div>
+
+      <div class="card">
+        <h3 class="section-title">Relatórios e Análises</h3>
+
+        <div class="grid-4">
+          <div class="kpi">
+            <div class="label">Motoristas</div>
+            <div class="value" id="repMotoristas">0</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Caminhões</div>
+            <div class="value" id="repCaminhoes">0</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Viagens</div>
+            <div class="value" id="repViagens">0</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Rodando</div>
+            <div class="value" id="repRodando">0</div>
+          </div>
+        </div>
+
+        <div class="chart-wrap">
+          <canvas id="chartCaminhoes"></canvas>
+        </div>
+      </div>
+    </section>
+
     <section id="detailScreen" class="screen hidden">
       <div class="top-actions">
         <button type="button" class="btn btn-outline back-btn" onclick="window.voltarDaViagem()">
@@ -638,7 +815,7 @@
         <div id="alertasViagem"></div>
       </div>
 
-      <div class="card" id="boxLancamento">
+      <div class="card">
         <h3 class="section-title">Lançamento de Despesa</h3>
 
         <div class="grid-2">
@@ -710,13 +887,18 @@
     const CLOUD_NAME = "domf2kvw6";
     const UPLOAD_PRESET = "registro_prazo";
 
+    let chartCaminhoes = null;
+
     const state = {
       perfil: null,
+      telaOrigemDetalhe: "operatorScreen",
       viagemId: null,
       viagem: null,
       despesas: [],
       fotoCupomUrl: "",
-      fotoCupomThumb: ""
+      fotoCupomThumb: "",
+      motoristas: [],
+      caminhoes: []
     };
 
     const TIPOS_OPERADOR = [
@@ -750,13 +932,25 @@
       loginScreen: document.getElementById("loginScreen"),
       operatorScreen: document.getElementById("operatorScreen"),
       managerScreen: document.getElementById("managerScreen"),
+      reportsScreen: document.getElementById("reportsScreen"),
       detailScreen: document.getElementById("detailScreen"),
 
       listaOperador: document.getElementById("listaOperador"),
       listaGestor: document.getElementById("listaGestor"),
       listaDespesas: document.getElementById("listaDespesas"),
+      listaMotoristas: document.getElementById("listaMotoristas"),
+      listaCaminhoes: document.getElementById("listaCaminhoes"),
 
-      motorista: document.getElementById("motorista"),
+      selectMotoristaViagem: document.getElementById("selectMotoristaViagem"),
+      selectCaminhaoViagem: document.getElementById("selectCaminhaoViagem"),
+
+      motoristaNome: document.getElementById("motoristaNome"),
+      motoristaTelefone: document.getElementById("motoristaTelefone"),
+
+      caminhaoPlaca: document.getElementById("caminhaoPlaca"),
+      caminhaoModelo: document.getElementById("caminhaoModelo"),
+      caminhaoDescricao: document.getElementById("caminhaoDescricao"),
+
       origem: document.getElementById("origem"),
       destino: document.getElementById("destino"),
       localCarga: document.getElementById("localCarga"),
@@ -786,7 +980,20 @@
       kpiFrete: document.getElementById("kpiFrete"),
       kpiDespesa: document.getElementById("kpiDespesa"),
       kpiLucro: document.getElementById("kpiLucro"),
-      alertaFinanceiroPainel: document.getElementById("alertaFinanceiroPainel")
+      alertaFinanceiroPainel: document.getElementById("alertaFinanceiroPainel"),
+
+      repMotoristas: document.getElementById("repMotoristas"),
+      repCaminhoes: document.getElementById("repCaminhoes"),
+      repViagens: document.getElementById("repViagens"),
+      repRodando: document.getElementById("repRodando"),
+      chartCaminhoes: document.getElementById("chartCaminhoes"),
+
+      tabBtnViagens: document.getElementById("tabBtnViagens"),
+      tabBtnMotoristas: document.getElementById("tabBtnMotoristas"),
+      tabBtnCaminhoes: document.getElementById("tabBtnCaminhoes"),
+      tabViagens: document.getElementById("tabViagens"),
+      tabMotoristas: document.getElementById("tabMotoristas"),
+      tabCaminhoes: document.getElementById("tabCaminhoes")
     };
 
     const widgetCupom = window.cloudinary.createUploadWidget(
@@ -794,7 +1001,9 @@
         cloudName: CLOUD_NAME,
         uploadPreset: UPLOAD_PRESET,
         multiple: false,
-        showCompletedButton: true
+        showCompletedButton: true,
+        folder: "transportes",
+        sources: ["local"]
       },
       (err, result) => {
         if (err) {
@@ -811,7 +1020,7 @@
       }
     );
 
-    function showToast(msg) {
+    function toast(msg) {
       alert(msg);
     }
 
@@ -842,7 +1051,7 @@
     }
 
     function mostrarTela(screenId) {
-      [el.loginScreen, el.operatorScreen, el.managerScreen, el.detailScreen].forEach((screen) => {
+      [el.loginScreen, el.operatorScreen, el.managerScreen, el.reportsScreen, el.detailScreen].forEach((screen) => {
         screen.classList.remove("active");
         screen.classList.add("hidden");
       });
@@ -854,15 +1063,45 @@
       }
     }
 
+    function abrirTabOperador(tab) {
+      const map = {
+        viagens: [el.tabBtnViagens, el.tabViagens],
+        motoristas: [el.tabBtnMotoristas, el.tabMotoristas],
+        caminhoes: [el.tabBtnCaminhoes, el.tabCaminhoes]
+      };
+
+      [el.tabBtnViagens, el.tabBtnMotoristas, el.tabBtnCaminhoes].forEach((b) => b.classList.remove("active"));
+      [el.tabViagens, el.tabMotoristas, el.tabCaminhoes].forEach((c) => {
+        c.classList.remove("active");
+        c.classList.add("hidden");
+      });
+
+      map[tab][0].classList.add("active");
+      map[tab][1].classList.add("active");
+      map[tab][1].classList.remove("hidden");
+    }
+
+    window.abrirTabOperador = abrirTabOperador;
+
     function limparFormularioViagem() {
-      el.motorista.value = "";
+      el.frete.value = "";
       el.origem.value = "";
       el.destino.value = "";
       el.localCarga.value = "";
       el.dataCarga.value = "";
       el.localDescarga.value = "";
       el.dataDescarga.value = "";
-      el.frete.value = "";
+    }
+
+    function limparFormularioMotorista() {
+      el.motoristaNome.value = "";
+      el.motoristaTelefone.value = "";
+    }
+
+    function limparFormularioCaminhao() {
+      el.caminhaoPlaca.value = "";
+      el.caminhaoModelo.value = "";
+      el.caminhaoDescricao.value = "";
     }
 
     function limparCupomAtual() {
@@ -883,93 +1122,131 @@
       `;
     }
 
+    async function fetchCollection(name) {
+      const snap = await getDocs(collection(db, name));
+      const arr = [];
+      snap.forEach((d) => arr.push({ id: d.id, ...d.data() }));
+      return arr.sort((a, b) => (b.criadoEm || 0) - (a.criadoEm || 0));
+    }
+
+    async function fetchTrips() {
+      return await fetchCollection("viagens");
+    }
+
+    async function fetchDrivers() {
+      return await fetchCollection("motoristas");
+    }
+
+    async function fetchTrucks() {
+      return await fetchCollection("caminhoes");
+    }
+
+    async function fetchExpenses(viagemId) {
+      const snap = await getDocs(collection(db, "viagens", viagemId, "despesas"));
+      const arr = [];
+      snap.forEach((d) => arr.push({ id: d.id, ...d.data() }));
+      return arr.sort((a, b) => (a.criadoEm || 0) - (b.criadoEm || 0));
+    }
+
     function carregarTiposDespesa() {
       const opcoes = [...TIPOS_OPERADOR];
-      if (state.perfil === "gestor") {
-        opcoes.push(...TIPOS_GESTOR_EXTRA);
-      }
+      if (state.perfil === "gestor") opcoes.push(...TIPOS_GESTOR_EXTRA);
 
       el.tipoDespesa.innerHTML = opcoes
-        .map(tipo => `<option value="${tipo}">${tipo}</option>`)
+        .map((tipo) => `<option value="${tipo}">${tipo}</option>`)
         .join("");
     }
 
-    async function buscarViagens() {
-      const snap = await getDocs(query(collection(db, "viagens"), orderBy("criadoEm", "desc")));
-      const viagens = [];
-      snap.forEach((item) => viagens.push({ id: item.id, ...item.data() }));
-      return viagens;
+    function populateDriverTruckSelects() {
+      el.selectMotoristaViagem.innerHTML = state.motoristas.length
+        ? state.motoristas.map((m) => `<option value="${m.id}">${m.nome}</option>`).join("")
+        : `<option value="">Cadastre um motorista</option>`;
+
+      el.selectCaminhaoViagem.innerHTML = state.caminhoes.length
+        ? state.caminhoes.map((c) => `<option value="${c.id}">${c.modelo} - ${c.placa}</option>`).join("")
+        : `<option value="">Cadastre um caminhão</option>`;
     }
 
-    async function buscarDespesas(viagemId) {
-      const snap = await getDocs(query(collection(db, "viagens", viagemId, "despesas"), orderBy("criadoEm", "asc")));
-      const despesas = [];
-      snap.forEach((item) => despesas.push({ id: item.id, ...item.data() }));
-      return despesas;
-    }
-
-    function calcularTotaisDespesas(despesas) {
-      return despesas.reduce((acc, item) => acc + Number(item.valor || 0), 0);
-    }
-
-    function contarDivergencias(despesas) {
-      return despesas.filter((d) => d.corrigido === true).length;
-    }
-
-    async function abrirDetalheViagem(viagemId) {
-      state.viagemId = viagemId;
-
-      const viagemRef = doc(db, "viagens", viagemId);
-      const viagemSnap = await getDoc(viagemRef);
-
-      if (!viagemSnap.exists()) {
-        showToast("Viagem não encontrada.");
+    function renderDriverList() {
+      if (!state.motoristas.length) {
+        el.listaMotoristas.innerHTML = `<div class="empty">Nenhum motorista cadastrado.</div>`;
         return;
       }
 
-      state.viagem = { id: viagemSnap.id, ...viagemSnap.data() };
-      state.despesas = await buscarDespesas(viagemId);
-
-      carregarTiposDespesa();
-      limparCupomAtual();
-      renderDetalhe();
-      mostrarTela("detailScreen");
+      el.listaMotoristas.innerHTML = state.motoristas.map((m) => `
+        <div class="cad-item">
+          <div>
+            <div class="cad-title">${m.nome}</div>
+            <div class="subtle">${m.telefone || "-"}</div>
+          </div>
+        </div>
+      `).join("");
     }
 
-    function renderTripListHTML(viagens) {
+    function renderTruckList() {
+      if (!state.caminhoes.length) {
+        el.listaCaminhoes.innerHTML = `<div class="empty">Nenhum caminhão cadastrado.</div>`;
+        return;
+      }
+
+      el.listaCaminhoes.innerHTML = state.caminhoes.map((c) => `
+        <div class="cad-item">
+          <div>
+            <div class="cad-title">${c.modelo} - ${c.placa}</div>
+            <div class="subtle">${c.descricao || "-"}</div>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function calculateExpenseTotal(despesas) {
+      return despesas.reduce((acc, d) => acc + Number(d.valor || 0), 0);
+    }
+
+    function countDivergences(despesas) {
+      return despesas.filter((d) => d.corrigido === true).length;
+    }
+
+    function renderTripCards(viagens) {
       if (!viagens.length) {
         return `<div class="empty">Nenhuma viagem cadastrada ainda.</div>`;
       }
 
-      return viagens.map((v) => {
-        const frete = Number(v.frete || 0);
-        return `
-          <div class="card trip-card" onclick="window.abrirViagem('${v.id}')">
-            <div class="trip-main">
-              <div class="trip-title">${v.motorista || "Sem motorista"} · ${v.origem || "-"} → ${v.destino || "-"}</div>
-              <div class="trip-meta">
-                Carga: ${v.localCarga || "-"} · ${formatDateTime(v.dataCarga)}<br>
-                Descarga: ${v.localDescarga || "-"} · ${formatDateTime(v.dataDescarga)}
-              </div>
-            </div>
-            <div class="trip-money">
-              <div><span class="pill ${getStatusClass(v.status)}">${getStatusLabel(v.status)}</span></div>
-              <div class="money-label" style="margin-top:10px;">Frete</div>
-              <div class="money-value">${formatCurrency(frete)}</div>
+      return viagens.map((v) => `
+        <div class="card trip-card" onclick="window.abrirViagem('${v.id}')">
+          <div class="trip-main">
+            <div class="trip-title">${v.motoristaNome || "-"} · ${v.origem || "-"} → ${v.destino || "-"}</div>
+            <div class="trip-meta">
+              Caminhão: ${v.caminhaoNome || "-"}<br>
+              Carga: ${v.localCarga || "-"} · ${formatDateTime(v.dataCarga)}<br>
+              Descarga: ${v.localDescarga || "-"} · ${formatDateTime(v.dataDescarga)}
             </div>
           </div>
-        `;
-      }).join("");
+          <div class="trip-money">
+            <div><span class="pill ${getStatusClass(v.status)}">${getStatusLabel(v.status)}</span></div>
+            <div class="money-label" style="margin-top:10px;">Frete</div>
+            <div class="money-value">${formatCurrency(v.frete)}</div>
+          </div>
+        </div>
+      `).join("");
     }
 
-    async function carregarPainelOperador() {
-      const viagens = await buscarViagens();
-      el.listaOperador.innerHTML = renderTripListHTML(viagens);
+    async function reloadMasterData() {
+      state.motoristas = await fetchDrivers();
+      state.caminhoes = await fetchTrucks();
+      populateDriverTruckSelects();
+      renderDriverList();
+      renderTruckList();
     }
 
-    async function carregarPainelGestor() {
-      const viagens = await buscarViagens();
+    async function loadOperatorScreen() {
+      await reloadMasterData();
+      const viagens = await fetchTrips();
+      el.listaOperador.innerHTML = renderTripCards(viagens);
+    }
 
+    async function loadManagerScreen() {
+      const viagens = await fetchTrips();
       let total = viagens.length;
       let abertas = 0;
       let concluidas = 0;
@@ -980,14 +1257,13 @@
       let divergenciasTotais = 0;
 
       for (const viagem of viagens) {
-        const despesas = await buscarDespesas(viagem.id);
-        const frete = Number(viagem.frete || 0);
-        const totalDesp = calcularTotaisDespesas(despesas);
+        const despesas = await fetchExpenses(viagem.id);
+        const totalDesp = calculateExpenseTotal(despesas);
 
-        freteTotal += frete;
+        freteTotal += Number(viagem.frete || 0);
         despesaTotal += totalDesp;
-        lucroTotal += frete - totalDesp;
-        divergenciasTotais += contarDivergencias(despesas);
+        lucroTotal += Number(viagem.frete || 0) - totalDesp;
+        divergenciasTotais += countDivergences(despesas);
 
         if (viagem.status === "aberta") abertas++;
         if (viagem.status === "concluida") concluidas++;
@@ -1002,34 +1278,94 @@
       el.kpiDespesa.textContent = formatCurrency(despesaTotal);
       el.kpiLucro.textContent = formatCurrency(lucroTotal);
 
-      if (divergenciasTotais > 0) {
-        el.alertaFinanceiroPainel.innerHTML = `
-          <div class="alert-box alert-warning">
-            <i class="fa-solid fa-triangle-exclamation"></i>
-            Foram registradas ${divergenciasTotais} divergência(s) corrigida(s) nas viagens.
-          </div>
-        `;
-      } else {
-        el.alertaFinanceiroPainel.innerHTML = `
-          <div class="alert-box alert-info">
-            <i class="fa-solid fa-circle-check"></i>
-            Nenhuma divergência financeira registrada até o momento.
-          </div>
-        `;
-      }
+      el.alertaFinanceiroPainel.innerHTML = divergenciasTotais > 0
+        ? `<div class="alert-box alert-warning"><i class="fa-solid fa-triangle-exclamation"></i> Foram registradas ${divergenciasTotais} divergência(s) corrigida(s).</div>`
+        : `<div class="alert-box alert-info"><i class="fa-solid fa-circle-check"></i> Nenhuma divergência financeira registrada.</div>`;
 
-      el.listaGestor.innerHTML = renderTripListHTML(viagens);
+      el.listaGestor.innerHTML = renderTripCards(viagens);
     }
 
-    function renderDetalhe() {
+    async function loadReportsScreen() {
+      const viagens = await fetchTrips();
+      const motoristas = await fetchDrivers();
+      const caminhoes = await fetchTrucks();
+
+      el.repMotoristas.textContent = motoristas.length;
+      el.repCaminhoes.textContent = caminhoes.length;
+      el.repViagens.textContent = viagens.length;
+      el.repRodando.textContent = viagens.filter((v) => v.status === "aberta" || v.status === "concluida").length;
+
+      const porCaminhao = {};
+      viagens.forEach((v) => {
+        const key = v.caminhaoNome || "Sem caminhão";
+        porCaminhao[key] = (porCaminhao[key] || 0) + 1;
+      });
+
+      const labels = Object.keys(porCaminhao);
+      const values = Object.values(porCaminhao);
+
+      if (chartCaminhoes) {
+        chartCaminhoes.destroy();
+      }
+
+      chartCaminhoes = new Chart(el.chartCaminhoes, {
+        type: "bar",
+        data: {
+          labels,
+          datasets: [
+            {
+              label: "Viagens por caminhão",
+              data: values,
+              borderWidth: 1,
+              borderRadius: 10
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { precision: 0 }
+            }
+          }
+        }
+      });
+    }
+
+    async function openTripDetail(viagemId) {
+      state.viagemId = viagemId;
+
+      const viagemRef = doc(db, "viagens", viagemId);
+      const viagemSnap = await getDoc(viagemRef);
+
+      if (!viagemSnap.exists()) {
+        toast("Viagem não encontrada.");
+        return;
+      }
+
+      state.viagem = { id: viagemSnap.id, ...viagemSnap.data() };
+      state.despesas = await fetchExpenses(viagemId);
+
+      carregarTiposDespesa();
+      limparCupomAtual();
+      renderDetail();
+      mostrarTela("detailScreen");
+    }
+
+    function renderDetail() {
       const viagem = state.viagem;
       const despesas = state.despesas;
-      const totalDespesa = calcularTotaisDespesas(despesas);
+      const totalDespesa = calculateExpenseTotal(despesas);
       const lucro = Number(viagem.frete || 0) - totalDespesa;
-      const divergencias = contarDivergencias(despesas);
+      const divergencias = countDivergences(despesas);
 
-      el.tituloViagem.textContent = `${viagem.motorista || "-"} · ${viagem.origem || "-"} → ${viagem.destino || "-"}`;
+      el.tituloViagem.textContent = `${viagem.motoristaNome || "-"} · ${viagem.origem || "-"} → ${viagem.destino || "-"}`;
       el.subtituloViagem.innerHTML = `
+        Caminhão: ${viagem.caminhaoNome || "-"}<br>
         Carregamento: ${viagem.localCarga || "-"} · ${formatDateTime(viagem.dataCarga)}<br>
         Descarregamento: ${viagem.localDescarga || "-"} · ${formatDateTime(viagem.dataDescarga)}
       `;
@@ -1045,28 +1381,13 @@
 
       let alertas = "";
       if (divergencias > 0) {
-        alertas += `
-          <div class="alert-box alert-warning">
-            <i class="fa-solid fa-scale-balanced"></i>
-            Esta viagem possui ${divergencias} divergência(s) financeira(s) corrigida(s) pelo gestor.
-          </div>
-        `;
+        alertas += `<div class="alert-box alert-warning"><i class="fa-solid fa-scale-balanced"></i> Esta viagem possui ${divergencias} divergência(s) corrigida(s).</div>`;
       } else {
-        alertas += `
-          <div class="alert-box alert-info">
-            <i class="fa-solid fa-file-invoice-dollar"></i>
-            Nenhuma divergência financeira registrada nesta viagem.
-          </div>
-        `;
+        alertas += `<div class="alert-box alert-info"><i class="fa-solid fa-file-invoice-dollar"></i> Nenhuma divergência financeira registrada.</div>`;
       }
 
       if (viagem.status === "aprovada") {
-        alertas += `
-          <div class="alert-box alert-info">
-            <i class="fa-solid fa-badge-check"></i>
-            Viagem já aprovada pelo gestor.
-          </div>
-        `;
+        alertas += `<div class="alert-box alert-info"><i class="fa-solid fa-badge-check"></i> Viagem já aprovada.</div>`;
       }
 
       el.alertasViagem.innerHTML = alertas;
@@ -1077,7 +1398,7 @@
 
       el.notaLancamento.textContent = state.perfil === "gestor"
         ? "Gestor pode lançar despesas normais e extras enquanto a viagem não estiver aprovada."
-        : "Operador pode lançar despesas apenas enquanto a viagem estiver em andamento.";
+        : "Operador pode lançar despesas enquanto a viagem estiver em andamento.";
 
       el.btnAdicionarDespesa.disabled = !podeLancar;
       el.tipoDespesa.disabled = !podeLancar;
@@ -1085,7 +1406,6 @@
 
       if (state.perfil === "operador" && viagem.status === "aberta") {
         el.btnFinalizarViagem.classList.remove("hidden");
-        el.btnFinalizarViagem.disabled = false;
       } else {
         el.btnFinalizarViagem.classList.add("hidden");
       }
@@ -1146,31 +1466,45 @@
       }).join("");
     }
 
-    async function atualizarViagemNoEstado() {
+    async function refreshCurrentTrip() {
       if (!state.viagemId) return;
       const viagemRef = doc(db, "viagens", state.viagemId);
       const viagemSnap = await getDoc(viagemRef);
       if (!viagemSnap.exists()) return;
       state.viagem = { id: viagemSnap.id, ...viagemSnap.data() };
-      state.despesas = await buscarDespesas(state.viagemId);
+      state.despesas = await fetchExpenses(state.viagemId);
     }
 
-    window.abrirOperador = function () {
+    window.abrirOperador = async function () {
       state.perfil = "operador";
+      abrirTabOperador("viagens");
+      await reloadMasterData();
+      await loadOperatorScreen();
       mostrarTela("operatorScreen");
-      carregarPainelOperador();
     };
 
-    window.abrirGestor = function () {
+    window.abrirGestor = async function () {
       const senha = prompt("Digite a senha do gestor:");
       if (senha !== "1234") {
-        showToast("Senha incorreta.");
+        toast("Senha incorreta.");
         return;
       }
 
       state.perfil = "gestor";
+      await loadManagerScreen();
       mostrarTela("managerScreen");
-      carregarPainelGestor();
+    };
+
+    window.abrirRelatorios = async function () {
+      const senha = prompt("Digite a senha dos relatórios:");
+      if (senha !== "1234") {
+        toast("Senha incorreta.");
+        return;
+      }
+
+      state.perfil = "relatorios";
+      await loadReportsScreen();
+      mostrarTela("reportsScreen");
     };
 
     window.voltarAoLogin = function () {
@@ -1182,9 +1516,70 @@
       mostrarTela("loginScreen");
     };
 
+    window.criarMotorista = async function () {
+      const nome = el.motoristaNome.value.trim();
+      const telefone = el.motoristaTelefone.value.trim();
+
+      if (!nome) {
+        toast("Informe o nome do motorista.");
+        return;
+      }
+
+      await addDoc(collection(db, "motoristas"), {
+        nome,
+        telefone,
+        criadoEm: Date.now()
+      });
+
+      limparFormularioMotorista();
+      await reloadMasterData();
+      toast("Motorista salvo com sucesso.");
+    };
+
+    window.criarCaminhao = async function () {
+      const placa = el.caminhaoPlaca.value.trim().toUpperCase();
+      const modelo = el.caminhaoModelo.value.trim();
+      const descricao = el.caminhaoDescricao.value.trim();
+
+      if (!placa || !modelo) {
+        toast("Informe placa e modelo do caminhão.");
+        return;
+      }
+
+      await addDoc(collection(db, "caminhoes"), {
+        placa,
+        modelo,
+        descricao,
+        criadoEm: Date.now()
+      });
+
+      limparFormularioCaminhao();
+      await reloadMasterData();
+      toast("Caminhão salvo com sucesso.");
+    };
+
     window.criarViagem = async function () {
+      const motoristaId = el.selectMotoristaViagem.value;
+      const caminhaoId = el.selectCaminhaoViagem.value;
+
+      const motorista = state.motoristas.find((m) => m.id === motoristaId);
+      const caminhao = state.caminhoes.find((c) => c.id === caminhaoId);
+
+      if (!motorista) {
+        toast("Selecione um motorista.");
+        return;
+      }
+
+      if (!caminhao) {
+        toast("Selecione um caminhão.");
+        return;
+      }
+
       const payload = {
-        motorista: el.motorista.value.trim(),
+        motoristaId,
+        motoristaNome: motorista.nome,
+        caminhaoId,
+        caminhaoNome: `${caminhao.modelo} - ${caminhao.placa}`,
         origem: el.origem.value.trim(),
         destino: el.destino.value.trim(),
         localCarga: el.localCarga.value.trim(),
@@ -1196,30 +1591,31 @@
         criadoEm: Date.now()
       };
 
-      if (!payload.motorista || !payload.origem || !payload.destino) {
-        showToast("Preencha motorista, origem e destino.");
+      if (!payload.origem || !payload.destino) {
+        toast("Preencha origem e destino.");
         return;
       }
 
       if (payload.frete <= 0) {
-        showToast("Informe um frete válido.");
+        toast("Informe um frete válido.");
         return;
       }
 
       await addDoc(collection(db, "viagens"), payload);
 
       limparFormularioViagem();
-      showToast("Viagem criada com sucesso.");
-      carregarPainelOperador();
+      await loadOperatorScreen();
+      toast("Viagem criada com sucesso.");
     };
 
     window.abrirViagem = async function (viagemId) {
-      await abrirDetalheViagem(viagemId);
+      state.telaOrigemDetalhe = state.perfil === "gestor" ? "managerScreen" : "operatorScreen";
+      await openTripDetail(viagemId);
     };
 
     window.abrirCameraCupom = function () {
       if (!state.viagemId) {
-        showToast("Abra uma viagem antes de enviar o cupom.");
+        toast("Abra uma viagem antes de enviar o cupom.");
         return;
       }
 
@@ -1235,19 +1631,19 @@
       const podeLancar = operadorPodeLancar || gestorPodeLancar;
 
       if (!podeLancar) {
-        showToast("Não é possível adicionar despesas nesse status.");
+        toast("Não é possível adicionar despesas nesse status.");
         return;
       }
 
       const valor = Number(el.valorDespesa.value || 0);
       if (valor <= 0) {
-        showToast("Não é permitido adicionar despesa com valor 0.");
+        toast("Não é permitido adicionar despesa com valor 0.");
         return;
       }
 
       const tipo = el.tipoDespesa.value;
       if (!tipo) {
-        showToast("Selecione o tipo da despesa.");
+        toast("Selecione o tipo da despesa.");
         return;
       }
 
@@ -1264,20 +1660,20 @@
       el.valorDespesa.value = "";
       limparCupomAtual();
 
-      await atualizarViagemNoEstado();
-      renderDetalhe();
+      await refreshCurrentTrip();
+      renderDetail();
     };
 
     window.finalizarViagem = async function () {
       if (!state.viagem || !state.viagemId) return;
 
       if (state.perfil !== "operador") {
-        showToast("Somente o operador pode finalizar a viagem.");
+        toast("Somente o operador pode finalizar a viagem.");
         return;
       }
 
       if (state.viagem.status !== "aberta") {
-        showToast("Essa viagem já foi finalizada anteriormente.");
+        toast("Essa viagem já foi finalizada anteriormente.");
         return;
       }
 
@@ -1285,18 +1681,16 @@
         status: "concluida"
       });
 
-      await atualizarViagemNoEstado();
-      renderDetalhe();
-      showToast("Viagem finalizada. Agora ela aguarda aprovação do gestor.");
+      await refreshCurrentTrip();
+      renderDetail();
+      toast("Viagem finalizada. Agora ela aguarda aprovação do gestor.");
     };
 
     window.corrigirDespesa = async function (despesaId) {
       if (state.perfil !== "gestor") {
-        showToast("Somente o gestor pode corrigir valores.");
+        toast("Somente o gestor pode corrigir valores.");
         return;
       }
-
-      if (!state.viagemId) return;
 
       const despesa = state.despesas.find((d) => d.id === despesaId);
       if (!despesa) return;
@@ -1305,12 +1699,11 @@
         `Valor atual: ${formatCurrency(despesa.valor)}\nDigite o valor correto:`,
         despesa.valor
       );
-
       if (novoValorTexto === null) return;
 
       const novoValor = Number(String(novoValorTexto).replace(",", "."));
       if (!Number.isFinite(novoValor) || novoValor <= 0) {
-        showToast("Valor corrigido inválido.");
+        toast("Valor corrigido inválido.");
         return;
       }
 
@@ -1324,21 +1717,21 @@
         motivoCorrecao: motivo.trim()
       });
 
-      await atualizarViagemNoEstado();
-      renderDetalhe();
-      showToast("Despesa corrigida com sucesso.");
+      await refreshCurrentTrip();
+      renderDetail();
+      toast("Despesa corrigida com sucesso.");
     };
 
     window.aprovarViagem = async function () {
       if (state.perfil !== "gestor") {
-        showToast("Somente o gestor pode aprovar viagens.");
+        toast("Somente o gestor pode aprovar viagens.");
         return;
       }
 
       if (!state.viagem || !state.viagemId) return;
 
       if (state.viagem.status !== "concluida") {
-        showToast("Somente viagens concluídas podem ser aprovadas.");
+        toast("Somente viagens concluídas podem ser aprovadas.");
         return;
       }
 
@@ -1346,20 +1739,20 @@
         status: "aprovada"
       });
 
-      await atualizarViagemNoEstado();
-      renderDetalhe();
-      showToast("Viagem aprovada com sucesso.");
+      await refreshCurrentTrip();
+      renderDetail();
+      toast("Viagem aprovada com sucesso.");
     };
 
     window.voltarDaViagem = async function () {
       limparCupomAtual();
 
-      if (state.perfil === "gestor") {
+      if (state.telaOrigemDetalhe === "managerScreen") {
+        await loadManagerScreen();
         mostrarTela("managerScreen");
-        await carregarPainelGestor();
       } else {
+        await loadOperatorScreen();
         mostrarTela("operatorScreen");
-        await carregarPainelOperador();
       }
     };
 
