@@ -21,103 +21,132 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-window.db = db;
-window.collection = collection;
-window.addDoc = addDoc;
-window.getDocs = getDocs;
-window.doc = doc;
-window.updateDoc = updateDoc;
+window.DB = db;
+window.FB = { collection, addDoc, getDocs, doc, updateDoc };
 </script>
 
 <style>
-body { margin:0; font-family:Segoe UI; background:#f1f5f9;}
 
-.header {
-  background:#0f172a;
-  color:#fff;
-  padding:15px;
-  font-weight:bold;
+/* RESET */
+* { box-sizing:border-box; }
+
+body {
+  margin:0;
+  font-family: "Segoe UI", sans-serif;
+  background:#f1f5f9;
 }
 
-.container { padding:20px; }
+/* HEADER */
+.header {
+  background: linear-gradient(90deg,#0f172a,#1e3a8a);
+  color:#fff;
+  padding:20px;
+  font-size:18px;
+  font-weight:600;
+}
 
+/* LAYOUT */
+.container {
+  padding:20px;
+}
+
+/* BOTÕES */
 .btn {
   width:100%;
   padding:14px;
   border:none;
   border-radius:10px;
   margin-top:10px;
-  font-weight:bold;
+  font-weight:600;
   cursor:pointer;
 }
 
-.primary { background:#2563eb; color:#fff;}
-.dark { background:#111827; color:#fff;}
+.btn-primary { background:#2563eb; color:#fff; }
+.btn-dark { background:#111827; color:#fff; }
+.btn-success { background:#16a34a; color:#fff; }
 
-.card {
-  background:#fff;
-  padding:15px;
-  border-radius:12px;
-  margin-top:12px;
-  box-shadow:0 4px 10px rgba(0,0,0,0.05);
-}
-
-.hidden { display:none; }
-
-.status {
-  font-size:12px;
-  padding:4px 8px;
-  border-radius:5px;
-}
-
-.aberta { background:#f59e0b; color:#fff;}
-.fechada { background:#16a34a; color:#fff;}
-
-.kpis { display:flex; gap:10px; flex-wrap:wrap;}
-.kpi { flex:1; text-align:center; }
-
+/* INPUT */
 input {
   width:100%;
   padding:12px;
   margin-top:10px;
   border-radius:10px;
-  border:1px solid #ccc;
+  border:1px solid #d1d5db;
 }
+
+/* CARD */
+.card {
+  background:#fff;
+  padding:16px;
+  border-radius:12px;
+  margin-top:12px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.06);
+}
+
+/* KPI */
+.kpis {
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.kpi {
+  flex:1;
+  text-align:center;
+}
+
+/* STATUS */
+.status {
+  font-size:12px;
+  padding:4px 8px;
+  border-radius:6px;
+}
+
+.aberta { background:#f59e0b; color:#fff; }
+.fechada { background:#16a34a; color:#fff; }
+
+/* UTILS */
+.hidden { display:none; }
+.title { font-weight:600; margin-bottom:10px; }
+
+.lucro-pos { color:#16a34a; font-weight:600; }
+.lucro-neg { color:#dc2626; font-weight:600; }
+
 </style>
 
 </head>
 
 <body>
 
-<div class="header">Fleet Intelligence</div>
+<div class="header">🚛 Fleet Intelligence PRO</div>
 
 <div class="container">
 
 <!-- LOGIN -->
-<div id="telaLogin">
-<button class="btn primary" onclick="goOperador()">Operador</button>
-<button class="btn dark" onclick="goGestor()">Gestor</button>
+<div id="screenLogin">
+<button class="btn btn-primary" onclick="App.loginOperador()">Operador</button>
+<button class="btn btn-dark" onclick="App.loginGestor()">Gestor</button>
 </div>
 
 <!-- OPERADOR -->
-<div id="telaOperador" class="hidden">
-<h3>Criar Viagem</h3>
+<div id="screenOperador" class="hidden">
+<div class="title">Nova Viagem</div>
 
-<input id="origem">
-<input id="destino">
-<input id="frete">
+<input id="origem" placeholder="Origem">
+<input id="destino" placeholder="Destino">
+<input id="frete" placeholder="Frete">
 
-<button class="btn primary" onclick="criarViagem()">Criar</button>
+<button class="btn btn-primary" onclick="App.criarViagem()">Criar Viagem</button>
 </div>
 
 <!-- DASHBOARD -->
-<div id="telaDashboard" class="hidden">
+<div id="screenDashboard" class="hidden">
 
 <div class="kpis">
-<div class="card kpi">Total <br><b id="k1"></b></div>
-<div class="card kpi">Abertas <br><b id="k2"></b></div>
-<div class="card kpi">Fechadas <br><b id="k3"></b></div>
-<div class="card kpi">Lucro <br><b id="k4"></b></div>
+<div class="card kpi">Total<br><b id="kTotal"></b></div>
+<div class="card kpi">Abertas<br><b id="kAberta"></b></div>
+<div class="card kpi">Fechadas<br><b id="kFechada"></b></div>
+<div class="card kpi">Lucro<br><b id="kLucro"></b></div>
 </div>
 
 <div id="lista"></div>
@@ -125,21 +154,23 @@ input {
 </div>
 
 <!-- DETALHE -->
-<div id="telaDetalhe" class="hidden">
+<div id="screenDetalhe" class="hidden">
 
-<button onclick="voltar()">⬅</button>
+<button class="btn btn-dark" onclick="App.voltar()">⬅ Voltar</button>
 
 <h3 id="titulo"></h3>
 
 <div id="resumo"></div>
 
-<input id="tipo">
-<input id="valor">
+<div class="title">Adicionar Despesa</div>
 
-<button class="btn primary" onclick="addDespesa()">Adicionar</button>
-<button class="btn dark" onclick="fecharViagem()">Finalizar</button>
+<input id="tipo" placeholder="Tipo">
+<input id="valor" placeholder="Valor">
 
-<div id="despesas"></div>
+<button class="btn btn-primary" onclick="App.addDespesa()">Adicionar</button>
+<button class="btn btn-success" onclick="App.fecharViagem()">Finalizar Viagem</button>
+
+<div id="listaDespesas"></div>
 
 </div>
 
@@ -147,127 +178,138 @@ input {
 
 <script>
 
-let state = {
-  viagem: null
-};
+const App = {
 
-/* NAV */
-function goOperador(){
-  show("telaOperador");
-}
+state: {
+  viagemAtual: null
+},
 
-function goGestor(){
-  let s = prompt("Senha");
-  if(s==="1234"){
-    show("telaDashboard");
-    loadDashboard();
-  }
-}
-
-function show(id){
+/* NAVEGAÇÃO */
+show(screen){
   document.querySelectorAll(".container > div").forEach(d=>d.classList.add("hidden"));
-  document.getElementById(id).classList.remove("hidden");
-}
+  document.getElementById(screen).classList.remove("hidden");
+},
 
-/* CRUD */
-async function criarViagem(){
-  await addDoc(collection(db,"viagens"),{
+loginOperador(){
+  this.show("screenOperador");
+},
+
+loginGestor(){
+  const s = prompt("Senha:");
+  if(s === "1234"){
+    this.show("screenDashboard");
+    this.loadDashboard();
+  }
+},
+
+/* CRIAR */
+async criarViagem(){
+  await FB.addDoc(FB.collection(DB,"viagens"),{
     origem: origem.value,
     destino: destino.value,
-    frete:Number(frete.value),
-    status:"aberta"
+    frete: Number(frete.value),
+    status:"aberta",
+    createdAt: new Date()
   });
-  alert("Criado");
-}
+
+  alert("Viagem criada!");
+},
 
 /* DASHBOARD */
-async function loadDashboard(){
+async loadDashboard(){
 
-let snap = await getDocs(collection(db,"viagens"));
+const snap = await FB.getDocs(FB.collection(DB,"viagens"));
 
 let total=0, abertas=0, fechadas=0, lucro=0;
 let html="";
 
-for(let v of snap.docs){
+for(const v of snap.docs){
 
-let data=v.data();
+const data = v.data();
 
-let despSnap=await getDocs(collection(db,"viagens",v.id,"despesas"));
+const despSnap = await FB.getDocs(FB.collection(DB,"viagens",v.id,"despesas"));
 
 let desp=0;
 despSnap.forEach(d=>desp+=d.data().valor);
 
-let l=data.frete-desp;
+const l = data.frete - desp;
 
 total++;
 if(data.status==="aberta") abertas++; else fechadas++;
-lucro+=l;
+lucro += l;
 
-html+=`
-<div class="card" onclick="openViagem('${v.id}','${data.origem}','${data.destino}',${data.frete})">
-<b>${data.origem} → ${data.destino}</b><br>
-<span class="status ${data.status}">${data.status}</span><br><br>
-Lucro: R$ ${l}
+html += `
+<div class="card" onclick="App.openViagem('${v.id}','${data.origem}','${data.destino}',${data.frete})">
+<div class="title">${data.origem} → ${data.destino}</div>
+<span class="status ${data.status}">${data.status}</span>
+<br><br>
+Lucro: <span class="${l>=0?'lucro-pos':'lucro-neg'}">R$ ${l}</span>
 </div>`;
 }
 
-lista.innerHTML=html;
-k1.innerText=total;
-k2.innerText=abertas;
-k3.innerText=fechadas;
-k4.innerText="R$ "+lucro;
+lista.innerHTML = html;
+kTotal.innerText = total;
+kAberta.innerText = abertas;
+kFechada.innerText = fechadas;
+kLucro.innerText = "R$ "+lucro;
 
-}
+},
 
 /* DETALHE */
-async function openViagem(id,o,d,f){
+async openViagem(id,o,d,f){
 
-state.viagem=id;
+this.state.viagemAtual = id;
+this.show("screenDetalhe");
 
-show("telaDetalhe");
+titulo.innerText = o+" → "+d;
 
-titulo.innerText=o+" → "+d;
-
-let snap=await getDocs(collection(db,"viagens",id,"despesas"));
+const snap = await FB.getDocs(FB.collection(DB,"viagens",id,"despesas"));
 
 let html="";
 let total=0;
 
 snap.forEach(x=>{
-  html+=`<div>${x.data().tipo} - R$ ${x.data().valor}</div>`;
-  total+=x.data().valor;
+  html += `<div class="card">${x.data().tipo} - R$ ${x.data().valor}</div>`;
+  total += x.data().valor;
 });
 
-despesas.innerHTML=html;
+listaDespesas.innerHTML = html;
 
-resumo.innerHTML=`
+resumo.innerHTML = `
 Receita: ${f}<br>
 Despesa: ${total}<br>
 Lucro: ${f-total}
 `;
 
-}
+},
 
-async function addDespesa(){
+/* DESPESA */
+async addDespesa(){
 
-await addDoc(collection(db,"viagens",state.viagem,"despesas"),{
-  tipo:tipo.value,
-  valor:Number(valor.value)
+await FB.addDoc(FB.collection(DB,"viagens",this.state.viagemAtual,"despesas"),{
+  tipo: tipo.value,
+  valor: Number(valor.value),
+  data: new Date()
 });
 
-openViagem(state.viagem,"","","");
+this.openViagem(this.state.viagemAtual,"","","");
 
+},
+
+/* FINALIZAR */
+async fecharViagem(){
+await FB.updateDoc(FB.doc(DB,"viagens",this.state.viagemAtual),{
+  status:"fechada"
+});
+this.voltar();
+},
+
+voltar(){
+this.show("screenDashboard");
+this.loadDashboard();
 }
 
-async function fecharViagem(){
-await updateDoc(doc(db,"viagens",state.viagem),{status:"fechada"});
-voltar();
-}
-
-function voltar(){
-show("telaDashboard");
-loadDashboard();
-}
+};
 
 </script>
 
