@@ -3,174 +3,112 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fleet Intelligence</title>
-
-<!-- FIREBASE -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import {
-  getFirestore, collection, addDoc, getDocs, doc, updateDoc
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyA52rHz97hUeTqobqmAbY58NLjkfO5O4jg",
-  authDomain: "transportes-1af13.firebaseapp.com",
-  projectId: "transportes-1af13"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-window.DB = db;
-window.FB = { collection, addDoc, getDocs, doc, updateDoc };
-</script>
+<title>Gestão de Transportes</title>
 
 <style>
-
-/* RESET */
-* { box-sizing:border-box; }
-
 body {
+  font-family: Arial;
   margin:0;
-  font-family: "Segoe UI", sans-serif;
-  background:#f1f5f9;
+  background:#f4f6f8;
 }
 
-/* HEADER */
 .header {
-  background: linear-gradient(90deg,#0f172a,#1e3a8a);
+  background:#1e3a8a;
   color:#fff;
-  padding:20px;
-  font-size:18px;
-  font-weight:600;
+  padding:15px;
+  font-weight:bold;
 }
 
-/* LAYOUT */
-.container {
-  padding:20px;
-}
+.container { padding:15px; }
 
-/* BOTÕES */
-.btn {
-  width:100%;
-  padding:14px;
-  border:none;
-  border-radius:10px;
-  margin-top:10px;
-  font-weight:600;
-  cursor:pointer;
-}
-
-.btn-primary { background:#2563eb; color:#fff; }
-.btn-dark { background:#111827; color:#fff; }
-.btn-success { background:#16a34a; color:#fff; }
-
-/* INPUT */
-input {
+button {
   width:100%;
   padding:12px;
   margin-top:10px;
-  border-radius:10px;
-  border:1px solid #d1d5db;
+  border:none;
+  border-radius:8px;
+  background:#2563eb;
+  color:#fff;
+  font-weight:bold;
 }
 
-/* CARD */
 .card {
   background:#fff;
-  padding:16px;
-  border-radius:12px;
-  margin-top:12px;
-  box-shadow:0 4px 12px rgba(0,0,0,0.06);
+  padding:15px;
+  border-radius:10px;
+  margin-top:10px;
 }
 
-/* KPI */
-.kpis {
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
+input {
+  width:100%;
+  padding:10px;
+  margin-top:8px;
 }
 
-.kpi {
-  flex:1;
-  text-align:center;
-}
-
-/* STATUS */
 .status {
+  padding:5px 10px;
+  border-radius:5px;
   font-size:12px;
-  padding:4px 8px;
-  border-radius:6px;
 }
 
-.aberta { background:#f59e0b; color:#fff; }
-.fechada { background:#16a34a; color:#fff; }
+.aberta { background:orange; color:#fff;}
+.concluida { background:#2563eb; color:#fff;}
+.aprovada { background:green; color:#fff;}
 
-/* UTILS */
 .hidden { display:none; }
-.title { font-weight:600; margin-bottom:10px; }
-
-.lucro-pos { color:#16a34a; font-weight:600; }
-.lucro-neg { color:#dc2626; font-weight:600; }
 
 </style>
-
 </head>
 
 <body>
 
-<div class="header">🚛 Fleet Intelligence PRO</div>
+<div class="header">🚛 Gestão de Transportes</div>
 
 <div class="container">
 
 <!-- LOGIN -->
-<div id="screenLogin">
-<button class="btn btn-primary" onclick="App.loginOperador()">Operador</button>
-<button class="btn btn-dark" onclick="App.loginGestor()">Gestor</button>
+<div id="login">
+<button onclick="operador()">Operador</button>
+<button onclick="gestor()">Gestor</button>
 </div>
 
 <!-- OPERADOR -->
-<div id="screenOperador" class="hidden">
-<div class="title">Nova Viagem</div>
+<div id="telaOperador" class="hidden">
 
+<h3>Nova Viagem</h3>
 <input id="origem" placeholder="Origem">
 <input id="destino" placeholder="Destino">
 <input id="frete" placeholder="Frete">
 
-<button class="btn btn-primary" onclick="App.criarViagem()">Criar Viagem</button>
+<button onclick="criarViagem()">Criar Viagem</button>
+
+<div id="listaOperador"></div>
+
 </div>
 
-<!-- DASHBOARD -->
-<div id="screenDashboard" class="hidden">
-
-<div class="kpis">
-<div class="card kpi">Total<br><b id="kTotal"></b></div>
-<div class="card kpi">Abertas<br><b id="kAberta"></b></div>
-<div class="card kpi">Fechadas<br><b id="kFechada"></b></div>
-<div class="card kpi">Lucro<br><b id="kLucro"></b></div>
-</div>
-
-<div id="lista"></div>
-
+<!-- GESTOR -->
+<div id="telaGestor" class="hidden">
+<h3>Painel Gestor</h3>
+<div id="listaGestor"></div>
 </div>
 
 <!-- DETALHE -->
-<div id="screenDetalhe" class="hidden">
+<div id="telaDetalhe" class="hidden">
 
-<button class="btn btn-dark" onclick="App.voltar()">⬅ Voltar</button>
+<button onclick="voltar()">⬅ Voltar</button>
 
 <h3 id="titulo"></h3>
 
 <div id="resumo"></div>
 
-<div class="title">Adicionar Despesa</div>
-
+<h4>Adicionar Despesa</h4>
 <input id="tipo" placeholder="Tipo">
 <input id="valor" placeholder="Valor">
 
-<button class="btn btn-primary" onclick="App.addDespesa()">Adicionar</button>
-<button class="btn btn-success" onclick="App.fecharViagem()">Finalizar Viagem</button>
+<button onclick="addDespesa()">Adicionar</button>
+<button onclick="finalizar()">Finalizar Viagem</button>
 
-<div id="listaDespesas"></div>
+<div id="despesas"></div>
 
 </div>
 
@@ -178,138 +116,171 @@ input {
 
 <script>
 
-const App = {
+let viagens = JSON.parse(localStorage.getItem("viagens")) || [];
+let viagemAtual = null;
 
-state: {
-  viagemAtual: null
-},
+/* LOGIN */
+function operador(){
+  login.style.display="none";
+  telaOperador.classList.remove("hidden");
+  renderOperador();
+}
 
-/* NAVEGAÇÃO */
-show(screen){
-  document.querySelectorAll(".container > div").forEach(d=>d.classList.add("hidden"));
-  document.getElementById(screen).classList.remove("hidden");
-},
-
-loginOperador(){
-  this.show("screenOperador");
-},
-
-loginGestor(){
-  const s = prompt("Senha:");
+function gestor(){
+  let s = prompt("Senha:");
   if(s === "1234"){
-    this.show("screenDashboard");
-    this.loadDashboard();
+    login.style.display="none";
+    telaGestor.classList.remove("hidden");
+    renderGestor();
   }
-},
+}
 
 /* CRIAR */
-async criarViagem(){
-  await FB.addDoc(FB.collection(DB,"viagens"),{
-    origem: origem.value,
-    destino: destino.value,
-    frete: Number(frete.value),
-    status:"aberta",
-    createdAt: new Date()
-  });
+function criarViagem(){
 
-  alert("Viagem criada!");
-},
+let v = {
+  id: Date.now(),
+  origem: origem.value,
+  destino: destino.value,
+  frete: Number(frete.value),
+  despesas: [],
+  status: "aberta"
+};
 
-/* DASHBOARD */
-async loadDashboard(){
+viagens.push(v);
+salvar();
 
-const snap = await FB.getDocs(FB.collection(DB,"viagens"));
+renderOperador();
 
-let total=0, abertas=0, fechadas=0, lucro=0;
-let html="";
-
-for(const v of snap.docs){
-
-const data = v.data();
-
-const despSnap = await FB.getDocs(FB.collection(DB,"viagens",v.id,"despesas"));
-
-let desp=0;
-despSnap.forEach(d=>desp+=d.data().valor);
-
-const l = data.frete - desp;
-
-total++;
-if(data.status==="aberta") abertas++; else fechadas++;
-lucro += l;
-
-html += `
-<div class="card" onclick="App.openViagem('${v.id}','${data.origem}','${data.destino}',${data.frete})">
-<div class="title">${data.origem} → ${data.destino}</div>
-<span class="status ${data.status}">${data.status}</span>
-<br><br>
-Lucro: <span class="${l>=0?'lucro-pos':'lucro-neg'}">R$ ${l}</span>
-</div>`;
 }
 
-lista.innerHTML = html;
-kTotal.innerText = total;
-kAberta.innerText = abertas;
-kFechada.innerText = fechadas;
-kLucro.innerText = "R$ "+lucro;
-
-},
-
-/* DETALHE */
-async openViagem(id,o,d,f){
-
-this.state.viagemAtual = id;
-this.show("screenDetalhe");
-
-titulo.innerText = o+" → "+d;
-
-const snap = await FB.getDocs(FB.collection(DB,"viagens",id,"despesas"));
+/* OPERADOR LISTA */
+function renderOperador(){
 
 let html="";
-let total=0;
 
-snap.forEach(x=>{
-  html += `<div class="card">${x.data().tipo} - R$ ${x.data().valor}</div>`;
-  total += x.data().valor;
-});
+viagens.forEach(v=>{
 
-listaDespesas.innerHTML = html;
-
-resumo.innerHTML = `
-Receita: ${f}<br>
-Despesa: ${total}<br>
-Lucro: ${f-total}
+html+=`
+<div class="card" onclick="abrir(${v.id})">
+<b>${v.origem} → ${v.destino}</b><br>
+<span class="status ${v.status}">${v.status}</span>
+</div>
 `;
 
-},
-
-/* DESPESA */
-async addDespesa(){
-
-await FB.addDoc(FB.collection(DB,"viagens",this.state.viagemAtual,"despesas"),{
-  tipo: tipo.value,
-  valor: Number(valor.value),
-  data: new Date()
 });
 
-this.openViagem(this.state.viagemAtual,"","","");
+listaOperador.innerHTML = html;
 
-},
-
-/* FINALIZAR */
-async fecharViagem(){
-await FB.updateDoc(FB.doc(DB,"viagens",this.state.viagemAtual),{
-  status:"fechada"
-});
-this.voltar();
-},
-
-voltar(){
-this.show("screenDashboard");
-this.loadDashboard();
 }
 
-};
+/* GESTOR */
+function renderGestor(){
+
+let html="";
+
+viagens.forEach(v=>{
+
+let total = v.despesas.reduce((a,b)=>a+b.valor,0);
+let lucro = v.frete - total;
+
+html+=`
+<div class="card">
+<b>${v.origem} → ${v.destino}</b><br>
+<span class="status ${v.status}">${v.status}</span><br><br>
+
+Receita: ${v.frete}<br>
+Despesa: ${total}<br>
+Lucro: ${lucro}<br>
+
+${v.status==="concluida" ? `<button onclick="aprovar(${v.id})">Aprovar</button>` : ""}
+
+</div>
+`;
+
+});
+
+listaGestor.innerHTML = html;
+
+}
+
+/* ABRIR */
+function abrir(id){
+
+viagemAtual = viagens.find(v=>v.id===id);
+
+telaOperador.classList.add("hidden");
+telaDetalhe.classList.remove("hidden");
+
+atualizarDetalhe();
+
+}
+
+/* DETALHE */
+function atualizarDetalhe(){
+
+titulo.innerText = viagemAtual.origem + " → " + viagemAtual.destino;
+
+let total = viagemAtual.despesas.reduce((a,b)=>a+b.valor,0);
+
+resumo.innerHTML = `
+Receita: ${viagemAtual.frete}<br>
+Despesa: ${total}<br>
+Lucro: ${viagemAtual.frete-total}
+`;
+
+let html="";
+
+viagemAtual.despesas.forEach(d=>{
+  html+=`<div>${d.tipo} - ${d.valor}</div>`;
+});
+
+despesas.innerHTML = html;
+
+}
+
+/* ADD DESPESA */
+function addDespesa(){
+
+viagemAtual.despesas.push({
+  tipo: tipo.value,
+  valor: Number(valor.value)
+});
+
+salvar();
+atualizarDetalhe();
+
+}
+
+/* FINALIZAR */
+function finalizar(){
+viagemAtual.status = "concluida";
+salvar();
+voltar();
+}
+
+/* APROVAR */
+function aprovar(id){
+
+let v = viagens.find(x=>x.id===id);
+v.status = "aprovada";
+
+salvar();
+renderGestor();
+
+}
+
+/* SALVAR */
+function salvar(){
+localStorage.setItem("viagens", JSON.stringify(viagens));
+}
+
+/* VOLTAR */
+function voltar(){
+telaDetalhe.classList.add("hidden");
+telaOperador.classList.remove("hidden");
+renderOperador();
+}
 
 </script>
 
