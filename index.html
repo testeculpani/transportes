@@ -3,1018 +3,675 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gestão de Transportes - Financeiro</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <title>Gestão de Transportes</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
   <style>
-    :root{
-      --bg1:#0ea5e9;
-      --bg2:#0284c7;
-      --ink:#0f172a;
-      --muted:#64748b;
-      --line:#e2e8f0;
-      --card:#ffffff;
-      --shadow:0 14px 35px rgba(15, 23, 42, .12);
+    * { box-sizing: border-box; }
 
-      --warn:#f59e0b;
-      --info:#3b82f6;
-      --ok:#16a34a;
-      --danger:#dc2626;
-      --soft:#f8fafc;
+    :root {
+      --bg1: #0ea5e9;
+      --bg2: #0284c7;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --shadow: 0 14px 35px rgba(15, 23, 42, 0.14);
+      --primary: #0ea5e9;
+      --primary-dark: #0369a1;
+      --success: #16a34a;
+      --warning: #f59e0b;
+      --danger: #dc2626;
+      --info: #2563eb;
     }
 
-    * { box-sizing:border-box; }
-
-    body{
-      margin:0;
-      font-family:Inter, "Segoe UI", Arial, sans-serif;
-      color:var(--ink);
-      background:
-        radial-gradient(circle at top left, rgba(255,255,255,.18), transparent 32%),
-        linear-gradient(135deg, var(--bg1), var(--bg2));
-      min-height:100vh;
-    }
-
-    .shell{
-      max-width:1180px;
-      margin:0 auto;
-      padding:22px 16px 36px;
-    }
-
-    .topbar{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      color:#fff;
-      margin-bottom:18px;
-    }
-
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      font-weight:800;
-      letter-spacing:.2px;
-      font-size:1.1rem;
-    }
-
-    .brand-badge{
-      width:42px;
-      height:42px;
-      border-radius:14px;
-      display:grid;
-      place-items:center;
-      background:rgba(255,255,255,.18);
-      backdrop-filter:blur(10px);
-      box-shadow:0 8px 20px rgba(0,0,0,.12);
-      font-size:1.05rem;
-    }
-
-    .profile-pill{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:10px 14px;
-      border-radius:999px;
-      background:rgba(255,255,255,.16);
-      color:#fff;
-      backdrop-filter:blur(10px);
-      font-size:.92rem;
-      font-weight:600;
-    }
-
-    .screen{ display:none; }
-    .screen.active{ display:block; }
-
-    .panel{
-      background:var(--card);
-      border-radius:22px;
-      box-shadow:var(--shadow);
-      border:1px solid rgba(255,255,255,.35);
-      padding:18px;
-    }
-
-    .hero{
-      display:grid;
-      grid-template-columns:1.2fr .8fr;
-      gap:18px;
-      align-items:stretch;
-    }
-
-    .hero-copy{
-      color:#fff;
-      padding:14px 4px 4px;
-    }
-
-    .hero-copy h1{
-      margin:0 0 8px;
-      font-size:clamp(1.6rem, 4vw, 2.5rem);
-      line-height:1.02;
-    }
-
-    .hero-copy p{
-      margin:0;
-      opacity:.92;
-      max-width:620px;
-      line-height:1.55;
-    }
-
-    .role-grid{
-      display:grid;
-      gap:14px;
-    }
-
-    .role-card{
-      border:none;
-      border-radius:22px;
-      padding:20px;
-      text-align:left;
-      cursor:pointer;
-      background:rgba(255,255,255,.95);
-      box-shadow:var(--shadow);
-      transition:transform .18s ease, box-shadow .18s ease;
-    }
-
-    .role-card:hover{ transform:translateY(-2px); }
-    .role-card .role-icon{
-      width:48px;
-      height:48px;
-      border-radius:16px;
-      display:grid;
-      place-items:center;
-      margin-bottom:14px;
-      color:#fff;
-      font-size:1.05rem;
-    }
-    .role-card.operator .role-icon{ background:linear-gradient(135deg,#0ea5e9,#2563eb); }
-    .role-card.manager .role-icon{ background:linear-gradient(135deg,#111827,#334155); }
-    .role-card h3{ margin:0 0 6px; font-size:1.05rem; }
-    .role-card p{ margin:0; color:var(--muted); line-height:1.45; }
-
-    .page-head{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom:14px;
-      color:#fff;
-    }
-
-    .page-head h2{
-      margin:0;
-      font-size:1.35rem;
-    }
-
-    .page-sub{
-      margin-top:4px;
-      font-size:.92rem;
-      opacity:.92;
-    }
-
-    .actions-inline{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-
-    .btn{
-      border:none;
-      border-radius:14px;
-      padding:12px 16px;
-      font-weight:700;
-      cursor:pointer;
-      transition:transform .15s ease, opacity .15s ease;
-      font-size:.95rem;
-    }
-    .btn:hover{ transform:translateY(-1px); }
-    .btn:disabled{
-      cursor:not-allowed;
-      opacity:.55;
-      transform:none;
-    }
-
-    .btn-primary{
-      color:#fff;
-      background:linear-gradient(135deg,#0ea5e9,#2563eb);
-    }
-    .btn-dark{
-      color:#fff;
-      background:linear-gradient(135deg,#0f172a,#334155);
-    }
-    .btn-soft{
-      color:var(--ink);
-      background:#eef6ff;
-      border:1px solid #dbeafe;
-    }
-    .btn-danger{
-      color:#fff;
-      background:linear-gradient(135deg,#dc2626,#b91c1c);
-    }
-    .btn-warning{
-      color:#fff;
-      background:linear-gradient(135deg,#f59e0b,#d97706);
-    }
-    .btn-sm{
-      padding:9px 12px;
-      border-radius:12px;
-      font-size:.85rem;
-      font-weight:700;
-    }
-
-    .grid-2{
-      display:grid;
-      grid-template-columns:420px minmax(0,1fr);
-      gap:18px;
-      align-items:start;
-    }
-
-    .form-grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:12px;
-    }
-
-    .field{
-      display:flex;
-      flex-direction:column;
-      gap:7px;
-      margin-bottom:10px;
-    }
-
-    .field label{
-      font-size:.86rem;
-      color:var(--muted);
-      font-weight:700;
-    }
-
-    input, select, textarea{
-      width:100%;
-      border:1px solid var(--line);
-      background:#fff;
-      border-radius:14px;
-      padding:12px 14px;
-      font:inherit;
-      color:var(--ink);
-      outline:none;
-      transition:border-color .15s ease, box-shadow .15s ease;
-    }
-
-    textarea{
-      min-height:90px;
-      resize:vertical;
-    }
-
-    input:focus, select:focus, textarea:focus{
-      border-color:#60a5fa;
-      box-shadow:0 0 0 4px rgba(96,165,250,.16);
-    }
-
-    .trip-grid{
-      display:grid;
-      grid-template-columns:repeat(2, minmax(0,1fr));
-      gap:14px;
-    }
-
-    .trip-card{
-      border:1px solid var(--line);
-      border-radius:18px;
-      padding:16px;
-      background:#fff;
-      box-shadow:0 8px 18px rgba(15,23,42,.06);
-      cursor:pointer;
-      transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
-    }
-    .trip-card:hover{
-      transform:translateY(-2px);
-      box-shadow:0 16px 28px rgba(15,23,42,.09);
-      border-color:#cbd5e1;
-    }
-
-    .trip-top{
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      align-items:flex-start;
-      margin-bottom:10px;
-    }
-
-    .trip-title{
-      font-weight:800;
-      line-height:1.25;
-      margin:0 0 4px;
-    }
-
-    .muted{ color:var(--muted); }
-
-    .status{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      padding:7px 10px;
-      border-radius:999px;
-      font-size:.76rem;
-      font-weight:800;
-      white-space:nowrap;
-    }
-    .status.aberta{ background:#fef3c7; color:#92400e; }
-    .status.concluida{ background:#dbeafe; color:#1d4ed8; }
-    .status.aprovada{ background:#dcfce7; color:#166534; }
-
-    .mini-grid{
-      display:grid;
-      grid-template-columns:repeat(2,1fr);
-      gap:10px;
-      margin-top:10px;
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: linear-gradient(135deg, var(--bg1), var(--bg2));
+      color: var(--text);
+      min-height: 100vh;
     }
 
-    .mini{
-      border:1px solid var(--line);
-      border-radius:14px;
-      padding:12px;
-      background:var(--soft);
+    .app-shell {
+      width: 100%;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 18px 14px 24px;
     }
 
-    .mini .label{
-      font-size:.78rem;
-      color:var(--muted);
-      margin-bottom:5px;
-      font-weight:700;
+    .topbar {
+      color: #fff;
+      padding: 10px 4px 18px;
+      text-align: center;
     }
-    .mini .value{
-      font-weight:800;
-    }
-
-    .kpi-grid{
-      display:grid;
-      grid-template-columns:repeat(6, minmax(0,1fr));
-      gap:14px;
-      margin-bottom:14px;
-    }
-
-    .kpi{
-      border-radius:18px;
-      padding:16px;
-      background:#fff;
-      box-shadow:var(--shadow);
-      border:1px solid rgba(255,255,255,.4);
-    }
-
-    .kpi .kpi-label{
-      color:var(--muted);
-      font-weight:700;
-      font-size:.82rem;
-      margin-bottom:8px;
-    }
-
-    .kpi .kpi-value{
-      font-size:1.4rem;
-      font-weight:900;
-      letter-spacing:-.02em;
-    }
-
-    .filters{
-      display:grid;
-      grid-template-columns:1.2fr .8fr .8fr;
-      gap:12px;
-      margin-bottom:14px;
-    }
-
-    .detail-layout{
-      display:grid;
-      grid-template-columns:minmax(0,1.2fr) 350px;
-      gap:18px;
-      align-items:start;
-    }
-
-    .section-head{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      margin-bottom:12px;
-    }
-
-    .section-head h3{
-      margin:0;
-      font-size:1.02rem;
-    }
-
-    .summary-grid{
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:12px;
-      margin-top:14px;
-    }
-
-    .summary-card{
-      border:1px solid var(--line);
-      border-radius:16px;
-      padding:14px;
-      background:var(--soft);
-    }
-
-    .summary-card .label{
-      color:var(--muted);
-      font-weight:700;
-      font-size:.8rem;
-      margin-bottom:7px;
-    }
-
-    .summary-card .value{
-      font-weight:900;
-      font-size:1.05rem;
-    }
-
-    .meta-grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-      margin-top:12px;
-    }
-
-    .meta-item{
-      border:1px solid var(--line);
-      border-radius:14px;
-      padding:12px 13px;
-      background:#fff;
-    }
-
-    .meta-item .label{
-      color:var(--muted);
-      font-size:.76rem;
-      font-weight:800;
-      margin-bottom:6px;
-      text-transform:uppercase;
-      letter-spacing:.03em;
-    }
-
-    .meta-item .value{
-      font-weight:700;
-      line-height:1.35;
-    }
-
-    .alert-box{
-      border-radius:16px;
-      padding:14px;
-      margin-top:14px;
-      border:1px solid transparent;
-    }
-
-    .alert-box.error{
-      background:#fef2f2;
-      border-color:#fecaca;
-      color:#991b1b;
-    }
 
-    .alert-box.warn{
-      background:#fff7ed;
-      border-color:#fed7aa;
-      color:#9a3412;
+    .topbar h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: 0.2px;
     }
 
-    .alert-item{
-      display:flex;
-      gap:10px;
-      align-items:flex-start;
-      padding:10px 0;
-      border-bottom:1px dashed rgba(100,116,139,.24);
+    .topbar p {
+      margin: 6px 0 0;
+      opacity: 0.95;
+      font-size: 14px;
     }
-    .alert-item:last-child{ border-bottom:none; }
 
-    .expense-form{
-      display:grid;
-      grid-template-columns:1.1fr .7fr auto;
-      gap:10px;
-      align-items:end;
-    }
-
-    .expense-list{
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-    }
-
-    .expense-item{
-      border:1px solid var(--line);
-      background:#fff;
-      border-radius:18px;
-      padding:14px;
-      display:grid;
-      grid-template-columns:auto 1fr auto;
-      gap:12px;
-      align-items:start;
-    }
-
-    .expense-icon{
-      width:42px;
-      height:42px;
-      border-radius:14px;
-      display:grid;
-      place-items:center;
-      background:#eff6ff;
-      color:#2563eb;
-      font-size:1rem;
-      flex:none;
-    }
-
-    .expense-title{
-      margin:0 0 4px;
-      font-size:.98rem;
-      font-weight:900;
-    }
-
-    .expense-sub{
-      color:var(--muted);
-      font-size:.84rem;
-      line-height:1.4;
-    }
-
-    .expense-amount{
-      text-align:right;
-      font-weight:900;
-      font-size:1rem;
-      white-space:nowrap;
-    }
-
-    .strike{
-      text-decoration:line-through;
-      color:#94a3b8;
-      font-weight:700;
-      margin-right:7px;
-    }
-
-    .expense-tags{
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
-      margin-top:8px;
-    }
-
-    .tag{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      border-radius:999px;
-      padding:6px 10px;
-      font-size:.73rem;
-      font-weight:800;
-      background:#f1f5f9;
-      color:#334155;
-    }
+    .screen.hidden { display: none; }
+    .screen.active { display: block; }
 
-    .tag.info{ background:#dbeafe; color:#1d4ed8; }
-    .tag.warn{ background:#fff7ed; color:#c2410c; }
-    .tag.ok{ background:#dcfce7; color:#166534; }
-
-    .expense-actions{
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-    }
-
-    .breakdown-list{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-    }
-
-    .breakdown-item{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      border:1px solid var(--line);
-      border-radius:14px;
-      padding:12px 13px;
-      background:#fff;
-    }
-
-    .break-left{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      min-width:0;
-    }
-
-    .break-left i{
-      width:28px;
-      text-align:center;
-      color:#2563eb;
+    .card {
+      background: var(--card);
+      border-radius: 20px;
+      padding: 16px;
+      margin-top: 14px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(255,255,255,0.55);
     }
 
-    .empty{
-      border:1px dashed #cbd5e1;
-      border-radius:16px;
-      padding:18px;
-      text-align:center;
-      color:var(--muted);
-      background:rgba(255,255,255,.7);
+    .section-title {
+      margin: 0 0 10px;
+      font-size: 18px;
+      font-weight: 800;
     }
 
-    .financial-banner{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      border-radius:16px;
-      padding:14px 16px;
-      margin-top:12px;
-      font-weight:800;
+    .subtle {
+      color: var(--muted);
+      font-size: 13px;
     }
 
-    .financial-banner.ok{
-      background:#dcfce7;
-      color:#166534;
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
     }
-    .financial-banner.warn{
-      background:#fff7ed;
-      color:#9a3412;
-    }
-    .financial-banner.error{
-      background:#fee2e2;
-      color:#991b1b;
-    }
-
-    .modal-wrap{
-      position:fixed;
-      inset:0;
-      background:rgba(15,23,42,.45);
-      display:none;
-      align-items:center;
-      justify-content:center;
-      padding:16px;
-      z-index:30;
-    }
-    .modal-wrap.active{ display:flex; }
-
-    .modal{
-      width:min(520px, 100%);
-      background:#fff;
-      border-radius:24px;
-      padding:20px;
-      box-shadow:0 18px 38px rgba(0,0,0,.24);
-    }
-
-    .modal h3{
-      margin:0 0 6px;
-      font-size:1.15rem;
-    }
-    .modal p{
-      margin:0 0 14px;
-      color:var(--muted);
-      line-height:1.45;
-    }
 
-    .modal-actions{
-      display:flex;
-      justify-content:flex-end;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:14px;
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
     }
 
-    .toast{
-      position:fixed;
-      right:18px;
-      bottom:18px;
-      min-width:250px;
-      max-width:420px;
-      padding:14px 16px;
-      border-radius:16px;
-      color:#fff;
-      font-weight:800;
-      box-shadow:0 16px 34px rgba(0,0,0,.2);
-      transform:translateY(18px);
-      opacity:0;
-      pointer-events:none;
-      transition:all .18s ease;
-      z-index:40;
-    }
-    .toast.show{
-      transform:translateY(0);
-      opacity:1;
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
     }
-    .toast.info{ background:#2563eb; }
-    .toast.error{ background:#dc2626; }
-    .toast.success{ background:#16a34a; }
-    .toast.warn{ background:#d97706; }
 
-    @media (max-width: 980px){
-      .grid-2,
-      .detail-layout,
-      .hero{
-        grid-template-columns:1fr;
-      }
-      .kpi-grid{
-        grid-template-columns:repeat(2, minmax(0,1fr));
-      }
-      .trip-grid{
-        grid-template-columns:1fr;
-      }
-      .filters{
-        grid-template-columns:1fr;
+    @media (max-width: 640px) {
+      .grid-2, .grid-3, .grid-4 {
+        grid-template-columns: 1fr;
       }
     }
 
-    @media (max-width: 720px){
-      .summary-grid,
-      .meta-grid,
-      .form-grid{
-        grid-template-columns:1fr;
-      }
-      .expense-form{
-        grid-template-columns:1fr;
-      }
-      .kpi-grid{
-        grid-template-columns:1fr 1fr;
-      }
-      .topbar{
-        flex-direction:column;
-        align-items:flex-start;
-      }
-      .page-head{
-        flex-direction:column;
-        align-items:flex-start;
-      }
+    label {
+      display: block;
+      margin-top: 10px;
+      margin-bottom: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #334155;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px 13px;
+      font-size: 15px;
+      outline: none;
+      background: #fff;
+      color: var(--text);
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.12);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 90px;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 14px;
+      padding: 13px 16px;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform .08s ease, opacity .15s ease;
+    }
+
+    .btn:active {
+      transform: scale(0.985);
+    }
+
+    .btn-primary {
+      background: linear-gradient(180deg, #22c1ff, #0ea5e9);
+      color: #fff;
+      flex: 1;
+    }
+
+    .btn-dark {
+      background: #111827;
+      color: #fff;
+      flex: 1;
+    }
+
+    .btn-success {
+      background: linear-gradient(180deg, #22c55e, #16a34a);
+      color: #fff;
+      flex: 1;
+    }
+
+    .btn-warning {
+      background: linear-gradient(180deg, #fbbf24, #f59e0b);
+      color: #fff;
+      flex: 1;
+    }
+
+    .btn-danger {
+      background: linear-gradient(180deg, #ef4444, #dc2626);
+      color: #fff;
+      flex: 1;
+    }
+
+    .btn-outline {
+      background: #fff;
+      color: var(--primary-dark);
+      border: 1px solid #bae6fd;
+      flex: 1;
+    }
+
+    .btn[disabled] {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .login-card {
+      text-align: center;
+      padding-top: 22px;
+      padding-bottom: 22px;
+    }
+
+    .login-card h2 {
+      margin: 0 0 6px;
+      font-size: 24px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .status-aberta {
+      background: rgba(245, 158, 11, 0.14);
+      color: #a16207;
+    }
+
+    .status-concluida {
+      background: rgba(37, 99, 235, 0.12);
+      color: #1d4ed8;
+    }
+
+    .status-aprovada {
+      background: rgba(22, 163, 74, 0.14);
+      color: #166534;
+    }
+
+    .status-divergencia {
+      background: rgba(220, 38, 38, 0.12);
+      color: #991b1b;
+    }
+
+    .kpi {
+      background: linear-gradient(180deg, #ffffff, #f8fbff);
+      border: 1px solid #e0f2fe;
+      border-radius: 18px;
+      padding: 14px;
+      box-shadow: 0 8px 18px rgba(2, 132, 199, 0.07);
+    }
+
+    .kpi .label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .kpi .value {
+      margin-top: 6px;
+      font-size: 22px;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .trip-card {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .trip-main {
+      min-width: 0;
+    }
+
+    .trip-title {
+      font-size: 17px;
+      font-weight: 800;
+      margin: 0 0 4px;
+    }
+
+    .trip-meta {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .trip-money {
+      text-align: right;
+      min-width: 130px;
+    }
+
+    .money-label {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .money-value {
+      font-weight: 900;
+      font-size: 18px;
+      margin-top: 4px;
+    }
+
+    .positive { color: var(--success); }
+    .negative { color: var(--danger); }
+
+    .divider {
+      height: 1px;
+      background: var(--line);
+      margin: 14px 0;
+    }
+
+    .alert-box {
+      border-radius: 16px;
+      padding: 13px 14px;
+      margin-top: 12px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .alert-info {
+      background: rgba(37, 99, 235, 0.10);
+      color: #1d4ed8;
+      border: 1px solid rgba(37, 99, 235, 0.16);
+    }
+
+    .alert-warning {
+      background: rgba(245, 158, 11, 0.12);
+      color: #92400e;
+      border: 1px solid rgba(245, 158, 11, 0.16);
+    }
+
+    .alert-danger {
+      background: rgba(220, 38, 38, 0.09);
+      color: #991b1b;
+      border: 1px solid rgba(220, 38, 38, 0.14);
+    }
+
+    .expense-item {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 14px;
+      border-radius: 16px;
+      background: #fff;
+      border: 1px solid #eef2f7;
+      box-shadow: 0 8px 16px rgba(15,23,42,0.04);
+      margin-top: 10px;
+    }
+
+    .expense-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: #e0f2fe;
+      color: var(--primary-dark);
+      font-size: 18px;
+    }
+
+    .expense-name {
+      font-weight: 800;
+      font-size: 15px;
+      margin-bottom: 4px;
+    }
+
+    .expense-meta {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .expense-value {
+      text-align: right;
+      font-weight: 900;
+      font-size: 18px;
+    }
+
+    .expense-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .mini-btn {
+      border: none;
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .mini-warning {
+      background: rgba(245, 158, 11, 0.14);
+      color: #92400e;
+    }
+
+    .mini-danger {
+      background: rgba(220, 38, 38, 0.10);
+      color: #991b1b;
+    }
+
+    .detail-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .summary-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 14px;
+    }
+
+    .summary-row strong {
+      font-size: 16px;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .toolbar .btn {
+      flex: 1;
+    }
+
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 22px 10px;
+      font-size: 14px;
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .inline-note {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .back-btn {
+      margin-top: 0;
     }
   </style>
 </head>
 <body>
-  <div class="shell">
+  <div class="app-shell">
     <div class="topbar">
-      <div class="brand">
-        <div class="brand-badge"><i class="fa-solid fa-truck-fast"></i></div>
-        <div>
-          Gestão de Transportes
-          <div style="font-size:.86rem; font-weight:600; opacity:.9;">Controle operacional e financeiro</div>
-        </div>
-      </div>
-      <div id="profilePill" class="profile-pill" style="display:none;"></div>
+      <h1>🚛 Gestão de Transportes</h1>
+      <p>Operação, conferência, divergências e aprovação financeira</p>
     </div>
 
-    <section id="roleScreen" class="screen active">
-      <div class="hero">
-        <div class="hero-copy">
-          <h1>Sistema financeiro de viagens com aprovação e divergências.</h1>
-          <p>
-            Operador abre a viagem, lança despesas e finaliza. Gestor revisa, corrige valores inconsistentes,
-            recebe alertas automáticos e só aprova quando não houver erro bloqueante.
-          </p>
-        </div>
+    <div id="toastArea"></div>
 
-        <div class="role-grid">
-          <button id="btnEntryOperator" class="role-card operator" type="button">
-            <div class="role-icon"><i class="fa-solid fa-user-gear"></i></div>
-            <h3>Operador</h3>
-            <p>Cadastra a viagem, lança despesas e conclui o processo operacional.</p>
+    <section id="loginScreen" class="screen active">
+      <div class="card login-card">
+        <h2>Acesso ao Sistema</h2>
+        <p class="subtle">Escolha o perfil para entrar</p>
+
+        <div class="btn-row">
+          <button type="button" id="btnOperador" class="btn btn-primary" onclick="window.abrirOperador()">
+            <i class="fa-solid fa-truck-fast"></i> Operador
           </button>
-
-          <button id="btnEntryManager" class="role-card manager" type="button">
-            <div class="role-icon"><i class="fa-solid fa-chart-line"></i></div>
-            <h3>Gestor</h3>
-            <p>Audita, ajusta divergências financeiras, acompanha alertas e aprova.</p>
+          <button type="button" id="btnGestor" class="btn btn-dark" onclick="window.abrirGestor()">
+            <i class="fa-solid fa-chart-line"></i> Gestor
           </button>
         </div>
       </div>
     </section>
 
-    <section id="operatorScreen" class="screen">
-      <div class="page-head">
-        <div>
-          <h2>Painel do Operador</h2>
-          <div class="page-sub">Criar viagem, preencher despesas e finalizar.</div>
+    <section id="operatorScreen" class="screen hidden">
+      <div class="top-actions">
+        <button type="button" class="btn btn-outline back-btn" onclick="window.voltarAoLogin()">
+          <i class="fa-solid fa-arrow-left"></i> Sair
+        </button>
+      </div>
+
+      <div class="card">
+        <h3 class="section-title">Nova Viagem</h3>
+
+        <div class="grid-2">
+          <div>
+            <label for="motorista">Motorista</label>
+            <input id="motorista" placeholder="Nome do motorista" />
+          </div>
+          <div>
+            <label for="frete">Valor do frete</label>
+            <input id="frete" type="number" step="0.01" placeholder="0,00" />
+          </div>
         </div>
-        <div class="actions-inline">
-          <button id="btnRefreshOperator" class="btn btn-soft btn-sm" type="button">Atualizar</button>
-          <button id="btnLogoutOperator" class="btn btn-dark btn-sm" type="button">Sair</button>
+
+        <div class="grid-2">
+          <div>
+            <label for="origem">Cidade de origem</label>
+            <input id="origem" placeholder="Cidade origem" />
+          </div>
+          <div>
+            <label for="destino">Cidade de destino</label>
+            <input id="destino" placeholder="Cidade destino" />
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <label for="localCarga">Local de carregamento</label>
+            <input id="localCarga" placeholder="Empresa / endereço" />
+          </div>
+          <div>
+            <label for="dataCarga">Data e hora do carregamento</label>
+            <input id="dataCarga" type="datetime-local" />
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <label for="localDescarga">Local de descarregamento</label>
+            <input id="localDescarga" placeholder="Cliente / endereço" />
+          </div>
+          <div>
+            <label for="dataDescarga">Data e hora do descarregamento</label>
+            <input id="dataDescarga" type="datetime-local" />
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button type="button" class="btn btn-primary" onclick="window.criarViagem()">
+            <i class="fa-solid fa-plus"></i> Criar viagem
+          </button>
         </div>
       </div>
 
-      <div class="grid-2">
-        <div class="panel">
-          <div class="section-head">
-            <h3>Nova viagem</h3>
-          </div>
-
-          <div class="form-grid">
-            <div class="field">
-              <label>Motorista</label>
-              <input id="tripDriver" type="text" placeholder="Ex.: João da Silva">
-            </div>
-
-            <div class="field">
-              <label>Caminhão</label>
-              <input id="tripTruck" type="text" placeholder="Ex.: MB 1620 / Placa ABC1D23">
-            </div>
-
-            <div class="field">
-              <label>Cidade de origem</label>
-              <input id="tripOriginCity" type="text" placeholder="Ex.: Ampére/PR">
-            </div>
-
-            <div class="field">
-              <label>Cidade de destino</label>
-              <input id="tripDestCity" type="text" placeholder="Ex.: Cascavel/PR">
-            </div>
-
-            <div class="field">
-              <label>Local de carregamento</label>
-              <input id="tripLoadLocation" type="text" placeholder="Ex.: CD Grilazer">
-            </div>
-
-            <div class="field">
-              <label>Data e hora do carregamento</label>
-              <input id="tripLoadDateTime" type="datetime-local">
-            </div>
-
-            <div class="field">
-              <label>Local de descarregamento</label>
-              <input id="tripUnloadLocation" type="text" placeholder="Ex.: Cliente / CD">
-            </div>
-
-            <div class="field">
-              <label>Data e hora do descarregamento</label>
-              <input id="tripUnloadDateTime" type="datetime-local">
-            </div>
-
-            <div class="field" style="grid-column:1 / -1;">
-              <label>Frete</label>
-              <input id="tripFreight" type="number" step="0.01" min="0" placeholder="Ex.: 8500,00">
-            </div>
-          </div>
-
-          <button id="btnCreateTrip" class="btn btn-primary" type="button">Criar viagem</button>
-        </div>
-
-        <div class="panel">
-          <div class="section-head">
-            <h3>Viagens lançadas</h3>
-            <span class="muted" id="operatorTripCount">0 viagem(ns)</span>
-          </div>
-          <div id="operatorTripList" class="trip-grid"></div>
-        </div>
+      <div class="card">
+        <h3 class="section-title">Viagens do Operador</h3>
+        <div id="listaOperador"></div>
       </div>
     </section>
 
-    <section id="managerScreen" class="screen">
-      <div class="page-head">
-        <div>
-          <h2>Painel do Gestor</h2>
-          <div class="page-sub">Acompanhamento financeiro, divergências, alertas e aprovação.</div>
-        </div>
-        <div class="actions-inline">
-          <button id="btnRefreshManager" class="btn btn-soft btn-sm" type="button">Atualizar</button>
-          <button id="btnLogoutManager" class="btn btn-dark btn-sm" type="button">Sair</button>
-        </div>
+    <section id="managerScreen" class="screen hidden">
+      <div class="top-actions">
+        <button type="button" class="btn btn-outline back-btn" onclick="window.voltarAoLogin()">
+          <i class="fa-solid fa-arrow-left"></i> Sair
+        </button>
       </div>
 
-      <div id="managerKpis" class="kpi-grid"></div>
+      <div class="card">
+        <h3 class="section-title">Painel do Gestor</h3>
+        <div class="grid-4">
+          <div class="kpi">
+            <div class="label">Total</div>
+            <div class="value" id="kpiTotal">0</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Abertas</div>
+            <div class="value" id="kpiAbertas">0</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Concluídas</div>
+            <div class="value" id="kpiConcluidas">0</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Aprovadas</div>
+            <div class="value" id="kpiAprovadas">0</div>
+          </div>
+        </div>
 
-      <div class="panel" style="margin-bottom:14px;">
-        <div class="section-head">
-          <h3>Filtros</h3>
-        </div>
-        <div class="filters">
-          <div class="field" style="margin-bottom:0;">
-            <label>Buscar</label>
-            <input id="managerSearch" type="text" placeholder="Motorista, caminhão, origem ou destino">
+        <div class="grid-3" style="margin-top:10px;">
+          <div class="kpi">
+            <div class="label">Frete total</div>
+            <div class="value" id="kpiFrete">R$ 0,00</div>
           </div>
-          <div class="field" style="margin-bottom:0;">
-            <label>Status</label>
-            <select id="managerStatusFilter">
-              <option value="">Todos</option>
-              <option value="aberta">Aberta</option>
-              <option value="concluida">Concluída</option>
-              <option value="aprovada">Aprovada</option>
-            </select>
+          <div class="kpi">
+            <div class="label">Despesas</div>
+            <div class="value" id="kpiDespesa">R$ 0,00</div>
           </div>
-          <div class="field" style="margin-bottom:0;">
-            <label>Caminhão</label>
-            <select id="managerTruckFilter">
-              <option value="">Todos</option>
-            </select>
+          <div class="kpi">
+            <div class="label">Resultado</div>
+            <div class="value" id="kpiLucro">R$ 0,00</div>
           </div>
         </div>
+
+        <div id="alertaFinanceiroPainel"></div>
       </div>
 
-      <div id="managerTripList" class="trip-grid"></div>
+      <div class="card">
+        <h3 class="section-title">Viagens do Gestor</h3>
+        <div id="listaGestor"></div>
+      </div>
     </section>
 
-    <section id="detailScreen" class="screen">
-      <div class="page-head">
-        <div>
-          <h2>Detalhe da viagem</h2>
-          <div class="page-sub">Controle operacional, divergências e fechamento financeiro.</div>
+    <section id="detailScreen" class="screen hidden">
+      <div class="top-actions">
+        <button type="button" class="btn btn-outline back-btn" onclick="window.voltarDaViagem()">
+          <i class="fa-solid fa-arrow-left"></i> Voltar
+        </button>
+      </div>
+
+      <div class="card">
+        <div class="detail-head">
+          <div>
+            <h3 class="section-title" id="tituloViagem">Viagem</h3>
+            <div class="subtle" id="subtituloViagem"></div>
+          </div>
+          <div id="statusViagemBadge"></div>
         </div>
-        <div class="actions-inline">
-          <button id="btnBackDetail" class="btn btn-soft btn-sm" type="button">Voltar</button>
+
+        <div class="divider"></div>
+
+        <div class="summary-list" id="resumoViagem"></div>
+        <div id="alertasViagem"></div>
+      </div>
+
+      <div class="card" id="boxLancamento">
+        <h3 class="section-title">Lançamento de Despesa</h3>
+
+        <div class="grid-2">
+          <div>
+            <label for="tipoDespesa">Tipo da despesa</label>
+            <select id="tipoDespesa"></select>
+          </div>
+          <div>
+            <label for="valorDespesa">Valor</label>
+            <input id="valorDespesa" type="number" step="0.01" placeholder="0,00" />
+          </div>
+        </div>
+
+        <div class="inline-note" id="notaLancamento"></div>
+
+        <div class="toolbar">
+          <button type="button" class="btn btn-primary" id="btnAdicionarDespesa" onclick="window.adicionarDespesa()">
+            <i class="fa-solid fa-plus"></i> Adicionar despesa
+          </button>
+          <button type="button" class="btn btn-warning" id="btnFinalizarViagem" onclick="window.finalizarViagem()">
+            <i class="fa-solid fa-flag-checkered"></i> Finalizar viagem
+          </button>
+          <button type="button" class="btn btn-success hidden" id="btnAprovarViagem" onclick="window.aprovarViagem()">
+            <i class="fa-solid fa-circle-check"></i> Aprovar viagem
+          </button>
         </div>
       </div>
 
-      <div class="detail-layout">
-        <div>
-          <div class="panel">
-            <div class="section-head">
-              <div>
-                <h3 id="detailTitle">Viagem</h3>
-                <div class="muted" id="detailSubtitle"></div>
-              </div>
-              <div id="detailStatusWrap"></div>
-            </div>
-
-            <div id="financialBanner"></div>
-
-            <div class="summary-grid" id="detailSummaryGrid"></div>
-
-            <div class="meta-grid" id="detailMetaGrid"></div>
-          </div>
-
-          <div class="panel" id="expenseEntryPanel" style="margin-top:18px;">
-            <div class="section-head">
-              <h3>Lançamentos financeiros</h3>
-              <span class="muted" id="expenseEntryHint"></span>
-            </div>
-
-            <div class="expense-form">
-              <div class="field" style="margin-bottom:0;">
-                <label>Tipo</label>
-                <select id="expenseType"></select>
-              </div>
-              <div class="field" style="margin-bottom:0;">
-                <label>Valor</label>
-                <input id="expenseValue" type="number" step="0.01" min="0" placeholder="0,00">
-              </div>
-              <button id="btnAddExpense" class="btn btn-primary" type="button" style="height:48px;">Adicionar</button>
-            </div>
-
-            <div class="actions-inline" style="margin-top:12px;">
-              <button id="btnFinalizeTrip" class="btn btn-dark btn-sm" type="button">Finalizar viagem</button>
-              <button id="btnApproveTrip" class="btn btn-primary btn-sm" type="button">Aprovar viagem</button>
-            </div>
-          </div>
-
-          <div class="panel" style="margin-top:18px;">
-            <div class="section-head">
-              <h3>Despesas lançadas</h3>
-              <span class="muted" id="expenseListCount">0 item(ns)</span>
-            </div>
-            <div id="expenseList" class="expense-list"></div>
-          </div>
-        </div>
-
-        <div>
-          <div class="panel">
-            <div class="section-head">
-              <h3>Financeiro consolidado</h3>
-            </div>
-            <div id="breakdownList" class="breakdown-list"></div>
-          </div>
-
-          <div class="panel" style="margin-top:18px;">
-            <div class="section-head">
-              <h3>Alertas automáticos</h3>
-            </div>
-            <div id="autoAlerts"></div>
-          </div>
-        </div>
+      <div class="card">
+        <h3 class="section-title">Despesas</h3>
+        <div id="listaDespesas"></div>
       </div>
     </section>
   </div>
-
-  <div id="correctionModalWrap" class="modal-wrap">
-    <div class="modal">
-      <h3>Valor inconsistente</h3>
-      <p>Ajuste o valor lançado pelo motorista. O sistema vai manter o valor original e registrar a divergência.</p>
-
-      <div class="field">
-        <label>Tipo</label>
-        <input id="correctionType" type="text" disabled>
-      </div>
-
-      <div class="field">
-        <label>Valor original</label>
-        <input id="correctionOriginal" type="text" disabled>
-      </div>
-
-      <div class="field">
-        <label>Valor corrigido</label>
-        <input id="correctionNewValue" type="number" step="0.01" min="0" placeholder="Digite o valor correto">
-      </div>
-
-      <div class="field">
-        <label>Motivo da divergência</label>
-        <textarea id="correctionReason" placeholder="Ex.: recibo divergente, erro de digitação, valor duplicado..."></textarea>
-      </div>
-
-      <div class="modal-actions">
-        <button id="btnCancelCorrection" class="btn btn-soft btn-sm" type="button">Cancelar</button>
-        <button id="btnSaveCorrection" class="btn btn-warning btn-sm" type="button">Salvar divergência</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="toast" class="toast"></div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -1024,8 +681,10 @@
       addDoc,
       getDocs,
       getDoc,
+      updateDoc,
       doc,
-      updateDoc
+      query,
+      orderBy
     } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -1037,54 +696,620 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    const els = {
-      roleScreen: document.getElementById("roleScreen"),
+    const state = {
+      perfil: null,
+      viagemId: null,
+      viagem: null,
+      despesas: []
+    };
+
+    const TIPOS_OPERADOR = [
+      "COMBUSTIVEL",
+      "OLEO",
+      "TRIAGEM",
+      "BORRACHARIA",
+      "MANUTENCAO",
+      "PEDAGIO",
+      "QUEBRA FRETE"
+    ];
+
+    const TIPOS_GESTOR_EXTRA = [
+      "ADIANTAMENTO",
+      "COMISSAO"
+    ];
+
+    const ICONES = {
+      "COMBUSTIVEL": "fa-gas-pump",
+      "OLEO": "fa-oil-can",
+      "TRIAGEM": "fa-box-open",
+      "BORRACHARIA": "fa-circle-dot",
+      "MANUTENCAO": "fa-wrench",
+      "PEDAGIO": "fa-road",
+      "QUEBRA FRETE": "fa-triangle-exclamation",
+      "ADIANTAMENTO": "fa-money-bill-wave",
+      "COMISSAO": "fa-user-tie"
+    };
+
+    const el = {
+      loginScreen: document.getElementById("loginScreen"),
       operatorScreen: document.getElementById("operatorScreen"),
       managerScreen: document.getElementById("managerScreen"),
       detailScreen: document.getElementById("detailScreen"),
-      profilePill: document.getElementById("profilePill"),
 
-      btnEntryOperator: document.getElementById("btnEntryOperator"),
-      btnEntryManager: document.getElementById("btnEntryManager"),
-      btnRefreshOperator: document.getElementById("btnRefreshOperator"),
-      btnLogoutOperator: document.getElementById("btnLogoutOperator"),
-      btnRefreshManager: document.getElementById("btnRefreshManager"),
-      btnLogoutManager: document.getElementById("btnLogoutManager"),
-      btnBackDetail: document.getElementById("btnBackDetail"),
+      listaOperador: document.getElementById("listaOperador"),
+      listaGestor: document.getElementById("listaGestor"),
+      listaDespesas: document.getElementById("listaDespesas"),
 
-      tripDriver: document.getElementById("tripDriver"),
-      tripTruck: document.getElementById("tripTruck"),
-      tripOriginCity: document.getElementById("tripOriginCity"),
-      tripDestCity: document.getElementById("tripDestCity"),
-      tripLoadLocation: document.getElementById("tripLoadLocation"),
-      tripLoadDateTime: document.getElementById("tripLoadDateTime"),
-      tripUnloadLocation: document.getElementById("tripUnloadLocation"),
-      tripUnloadDateTime: document.getElementById("tripUnloadDateTime"),
-      tripFreight: document.getElementById("tripFreight"),
-      btnCreateTrip: document.getElementById("btnCreateTrip"),
+      motorista: document.getElementById("motorista"),
+      origem: document.getElementById("origem"),
+      destino: document.getElementById("destino"),
+      localCarga: document.getElementById("localCarga"),
+      dataCarga: document.getElementById("dataCarga"),
+      localDescarga: document.getElementById("localDescarga"),
+      dataDescarga: document.getElementById("dataDescarga"),
+      frete: document.getElementById("frete"),
 
-      operatorTripList: document.getElementById("operatorTripList"),
-      operatorTripCount: document.getElementById("operatorTripCount"),
+      tipoDespesa: document.getElementById("tipoDespesa"),
+      valorDespesa: document.getElementById("valorDespesa"),
+      btnAdicionarDespesa: document.getElementById("btnAdicionarDespesa"),
+      btnFinalizarViagem: document.getElementById("btnFinalizarViagem"),
+      btnAprovarViagem: document.getElementById("btnAprovarViagem"),
+      notaLancamento: document.getElementById("notaLancamento"),
+      boxLancamento: document.getElementById("boxLancamento"),
 
-      managerKpis: document.getElementById("managerKpis"),
-      managerSearch: document.getElementById("managerSearch"),
-      managerStatusFilter: document.getElementById("managerStatusFilter"),
-      managerTruckFilter: document.getElementById("managerTruckFilter"),
-      managerTripList: document.getElementById("managerTripList"),
+      tituloViagem: document.getElementById("tituloViagem"),
+      subtituloViagem: document.getElementById("subtituloViagem"),
+      statusViagemBadge: document.getElementById("statusViagemBadge"),
+      resumoViagem: document.getElementById("resumoViagem"),
+      alertasViagem: document.getElementById("alertasViagem"),
 
-      detailTitle: document.getElementById("detailTitle"),
-      detailSubtitle: document.getElementById("detailSubtitle"),
-      detailStatusWrap: document.getElementById("detailStatusWrap"),
-      financialBanner: document.getElementById("financialBanner"),
-      detailSummaryGrid: document.getElementById("detailSummaryGrid"),
-      detailMetaGrid: document.getElementById("detailMetaGrid"),
-      expenseEntryPanel: document.getElementById("expenseEntryPanel"),
-      expenseEntryHint: document.getElementById("expenseEntryHint"),
-      expenseType: document.getElementById("expenseType"),
-      expenseValue: document.getElementById("expenseValue"),
-      btnAddExpense: document.getElementById("btnAddExpense"),
-      btnFinalizeTrip: document.getElementById("btnFinalizeTrip"),
-      btnApproveTrip: document.getElementById("btnApproveTrip"),
-      expenseListCount: document.getElementById("expenseListCount"),
-      expenseList: document.getElementById("expenseList"),
-      breakdownList:
+      kpiTotal: document.getElementById("kpiTotal"),
+      kpiAbertas: document.getElementById("kpiAbertas"),
+      kpiConcluidas: document.getElementById("kpiConcluidas"),
+      kpiAprovadas: document.getElementById("kpiAprovadas"),
+      kpiFrete: document.getElementById("kpiFrete"),
+      kpiDespesa: document.getElementById("kpiDespesa"),
+      kpiLucro: document.getElementById("kpiLucro"),
+      alertaFinanceiroPainel: document.getElementById("alertaFinanceiroPainel")
+    };
+
+    function showToast(msg, type = "info") {
+      alert(msg);
+    }
+
+    function formatCurrency(value) {
+      const num = Number(value || 0);
+      return num.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+    }
+
+    function formatDateTime(value) {
+      if (!value) return "-";
+      const d = new Date(value);
+      if (Number.isNaN(d.getTime())) return value;
+      return d.toLocaleString("pt-BR");
+    }
+
+    function getStatusClass(status) {
+      if (status === "aberta") return "status-aberta";
+      if (status === "concluida") return "status-concluida";
+      if (status === "aprovada") return "status-aprovada";
+      return "status-aberta";
+    }
+
+    function getStatusLabel(status) {
+      if (status === "aberta") return "Em andamento";
+      if (status === "concluida") return "Aguardando aprovação";
+      if (status === "aprovada") return "Aprovada";
+      return status || "-";
+    }
+
+    function mostrarTela(screenId) {
+      [el.loginScreen, el.operatorScreen, el.managerScreen, el.detailScreen].forEach((screen) => {
+        screen.classList.remove("active");
+        screen.classList.add("hidden");
+      });
+
+      const tela = document.getElementById(screenId);
+      if (tela) {
+        tela.classList.remove("hidden");
+        tela.classList.add("active");
+      }
+    }
+
+    function limparFormularioViagem() {
+      el.motorista.value = "";
+      el.origem.value = "";
+      el.destino.value = "";
+      el.localCarga.value = "";
+      el.dataCarga.value = "";
+      el.localDescarga.value = "";
+      el.dataDescarga.value = "";
+      el.frete.value = "";
+    }
+
+    function carregarTiposDespesa() {
+      const opcoes = [...TIPOS_OPERADOR];
+      if (state.perfil === "gestor") {
+        opcoes.push(...TIPOS_GESTOR_EXTRA);
+      }
+
+      el.tipoDespesa.innerHTML = opcoes
+        .map(tipo => `<option value="${tipo}">${tipo}</option>`)
+        .join("");
+    }
+
+    async function buscarViagens() {
+      const snap = await getDocs(query(collection(db, "viagens"), orderBy("criadoEm", "desc")));
+      const viagens = [];
+      snap.forEach((item) => viagens.push({ id: item.id, ...item.data() }));
+      return viagens;
+    }
+
+    async function buscarDespesas(viagemId) {
+      const snap = await getDocs(query(collection(db, "viagens", viagemId, "despesas"), orderBy("criadoEm", "asc")));
+      const despesas = [];
+      snap.forEach((item) => despesas.push({ id: item.id, ...item.data() }));
+      return despesas;
+    }
+
+    function calcularTotaisDespesas(despesas) {
+      return despesas.reduce((acc, item) => acc + Number(item.valor || 0), 0);
+    }
+
+    function contarDivergencias(despesas) {
+      return despesas.filter((d) => d.corrigido === true).length;
+    }
+
+    function hasPendenciaNaoCorrigida(despesas) {
+      return despesas.some((d) => d.divergenciaPendente === true);
+    }
+
+    async function abrirDetalheViagem(viagemId) {
+      state.viagemId = viagemId;
+
+      const viagemRef = doc(db, "viagens", viagemId);
+      const viagemSnap = await getDoc(viagemRef);
+
+      if (!viagemSnap.exists()) {
+        showToast("Viagem não encontrada.", "error");
+        return;
+      }
+
+      state.viagem = { id: viagemSnap.id, ...viagemSnap.data() };
+      state.despesas = await buscarDespesas(viagemId);
+
+      carregarTiposDespesa();
+      renderDetalhe();
+      mostrarTela("detailScreen");
+    }
+
+    function renderTripListHTML(viagens) {
+      if (!viagens.length) {
+        return `<div class="empty">Nenhuma viagem cadastrada ainda.</div>`;
+      }
+
+      return viagens.map((v) => {
+        const frete = Number(v.frete || 0);
+        return `
+          <div class="card trip-card" onclick="window.abrirViagem('${v.id}')">
+            <div class="trip-main">
+              <div class="trip-title">${v.motorista || "Sem motorista"} · ${v.origem || "-"} → ${v.destino || "-"}</div>
+              <div class="trip-meta">
+                Carga: ${v.localCarga || "-"} · ${formatDateTime(v.dataCarga)}<br>
+                Descarga: ${v.localDescarga || "-"} · ${formatDateTime(v.dataDescarga)}
+              </div>
+            </div>
+            <div class="trip-money">
+              <div><span class="pill ${getStatusClass(v.status)}">${getStatusLabel(v.status)}</span></div>
+              <div class="money-label" style="margin-top:10px;">Frete</div>
+              <div class="money-value">${formatCurrency(frete)}</div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    async function carregarPainelOperador() {
+      const viagens = await buscarViagens();
+      el.listaOperador.innerHTML = renderTripListHTML(viagens);
+    }
+
+    async function carregarPainelGestor() {
+      const viagens = await buscarViagens();
+
+      let total = viagens.length;
+      let abertas = 0;
+      let concluidas = 0;
+      let aprovadas = 0;
+      let freteTotal = 0;
+      let despesaTotal = 0;
+      let lucroTotal = 0;
+      let divergenciasTotais = 0;
+
+      for (const viagem of viagens) {
+        const despesas = await buscarDespesas(viagem.id);
+        const frete = Number(viagem.frete || 0);
+        const totalDesp = calcularTotaisDespesas(despesas);
+
+        freteTotal += frete;
+        despesaTotal += totalDesp;
+        lucroTotal += frete - totalDesp;
+        divergenciasTotais += contarDivergencias(despesas);
+
+        if (viagem.status === "aberta") abertas++;
+        if (viagem.status === "concluida") concluidas++;
+        if (viagem.status === "aprovada") aprovadas++;
+      }
+
+      el.kpiTotal.textContent = total;
+      el.kpiAbertas.textContent = abertas;
+      el.kpiConcluidas.textContent = concluidas;
+      el.kpiAprovadas.textContent = aprovadas;
+      el.kpiFrete.textContent = formatCurrency(freteTotal);
+      el.kpiDespesa.textContent = formatCurrency(despesaTotal);
+      el.kpiLucro.textContent = formatCurrency(lucroTotal);
+
+      if (divergenciasTotais > 0) {
+        el.alertaFinanceiroPainel.innerHTML = `
+          <div class="alert-box alert-warning">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            Foram registradas ${divergenciasTotais} divergência(s) financeira(s) corrigida(s) nas viagens.
+          </div>
+        `;
+      } else {
+        el.alertaFinanceiroPainel.innerHTML = `
+          <div class="alert-box alert-info">
+            <i class="fa-solid fa-circle-check"></i>
+            Nenhuma divergência financeira registrada até o momento.
+          </div>
+        `;
+      }
+
+      el.listaGestor.innerHTML = renderTripListHTML(viagens);
+    }
+
+    function renderDetalhe() {
+      const viagem = state.viagem;
+      const despesas = state.despesas;
+      const totalDespesa = calcularTotaisDespesas(despesas);
+      const lucro = Number(viagem.frete || 0) - totalDespesa;
+      const divergencias = contarDivergencias(despesas);
+      const pendencia = hasPendenciaNaoCorrigida(despesas);
+
+      el.tituloViagem.textContent = `${viagem.motorista || "-"} · ${viagem.origem || "-"} → ${viagem.destino || "-"}`;
+      el.subtituloViagem.innerHTML = `
+        Carregamento: ${viagem.localCarga || "-"} · ${formatDateTime(viagem.dataCarga)}<br>
+        Descarregamento: ${viagem.localDescarga || "-"} · ${formatDateTime(viagem.dataDescarga)}
+      `;
+
+      el.statusViagemBadge.innerHTML = `<span class="pill ${getStatusClass(viagem.status)}">${getStatusLabel(viagem.status)}</span>`;
+
+      el.resumoViagem.innerHTML = `
+        <div class="summary-row"><span>Frete</span><strong>${formatCurrency(viagem.frete)}</strong></div>
+        <div class="summary-row"><span>Total de despesas</span><strong>${formatCurrency(totalDespesa)}</strong></div>
+        <div class="summary-row"><span>Resultado</span><strong class="${lucro >= 0 ? "positive" : "negative"}">${formatCurrency(lucro)}</strong></div>
+        <div class="summary-row"><span>Divergências corrigidas</span><strong>${divergencias}</strong></div>
+      `;
+
+      let alertas = "";
+      if (pendencia) {
+        alertas += `
+          <div class="alert-box alert-danger">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            Existem divergências pendentes. Não é possível aprovar enquanto houver inconsistências não corrigidas.
+          </div>
+        `;
+      } else if (divergencias > 0) {
+        alertas += `
+          <div class="alert-box alert-warning">
+            <i class="fa-solid fa-scale-balanced"></i>
+            Esta viagem possui ${divergencias} divergência(s) corrigida(s) pelo gestor.
+          </div>
+        `;
+      } else {
+        alertas += `
+          <div class="alert-box alert-info">
+            <i class="fa-solid fa-file-invoice-dollar"></i>
+            Nenhuma divergência financeira registrada nesta viagem.
+          </div>
+        `;
+      }
+
+      if (viagem.status === "aprovada") {
+        alertas += `
+          <div class="alert-box alert-info">
+            <i class="fa-solid fa-badge-check"></i>
+            Viagem já aprovada pelo gestor.
+          </div>
+        `;
+      }
+
+      el.alertasViagem.innerHTML = alertas;
+
+      const bloqueada = viagem.status === "concluida" || viagem.status === "aprovada";
+      if (state.perfil === "gestor" || bloqueada) {
+        el.notaLancamento.textContent = bloqueada
+          ? "Lançamentos bloqueados porque a viagem já foi finalizada ou aprovada."
+          : "Gestor pode lançar despesas normais e extras.";
+      } else {
+        el.notaLancamento.textContent = "Operador pode lançar despesas até finalizar a viagem.";
+      }
+
+      el.btnAdicionarDespesa.disabled = bloqueada;
+      el.tipoDespesa.disabled = bloqueada;
+      el.valorDespesa.disabled = bloqueada;
+
+      if (state.perfil === "operador" && viagem.status === "aberta") {
+        el.btnFinalizarViagem.classList.remove("hidden");
+        el.btnFinalizarViagem.disabled = false;
+      } else {
+        el.btnFinalizarViagem.classList.add("hidden");
+      }
+
+      if (
+        state.perfil === "gestor" &&
+        viagem.status === "concluida" &&
+        !pendencia
+      ) {
+        el.btnAprovarViagem.classList.remove("hidden");
+      } else {
+        el.btnAprovarViagem.classList.add("hidden");
+      }
+
+      if (!despesas.length) {
+        el.listaDespesas.innerHTML = `<div class="empty">Nenhuma despesa lançada nessa viagem.</div>`;
+        return;
+      }
+
+      el.listaDespesas.innerHTML = despesas.map((d, index) => {
+        const valorAtual = Number(d.valor || 0);
+        const valorOriginal = Number(d.valorOriginal ?? d.valor ?? 0);
+        const foiCorrigida = d.corrigido === true;
+        const motivo = d.motivoCorrecao || "";
+        const icon = ICONES[d.tipo] || "fa-receipt";
+
+        return `
+          <div class="expense-item">
+            <div class="expense-icon">
+              <i class="fa-solid ${icon}"></i>
+            </div>
+
+            <div>
+              <div class="expense-name">${d.tipo}</div>
+              <div class="expense-meta">
+                ${foiCorrigida
+                  ? `Valor original: ${formatCurrency(valorOriginal)} · Corrigido para: ${formatCurrency(valorAtual)}`
+                  : `Valor lançado: ${formatCurrency(valorAtual)}`
+                }
+                ${motivo ? `<br>Motivo: ${motivo}` : ""}
+              </div>
+
+              ${
+                state.perfil === "gestor" && state.viagem.status !== "aprovada"
+                  ? `
+                    <div class="expense-actions">
+                      <button type="button" class="mini-btn mini-warning" onclick="window.corrigirDespesa('${d.id}')">
+                        <i class="fa-solid fa-pen-to-square"></i> Valor inconsistente
+                      </button>
+                    </div>
+                  `
+                  : ""
+              }
+            </div>
+
+            <div class="expense-value ${foiCorrigida ? "negative" : ""}">
+              ${formatCurrency(valorAtual)}
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    async function atualizarViagemNoEstado() {
+      if (!state.viagemId) return;
+      const viagemRef = doc(db, "viagens", state.viagemId);
+      const viagemSnap = await getDoc(viagemRef);
+      if (!viagemSnap.exists()) return;
+      state.viagem = { id: viagemSnap.id, ...viagemSnap.data() };
+      state.despesas = await buscarDespesas(state.viagemId);
+    }
+
+    window.abrirOperador = function () {
+      state.perfil = "operador";
+      mostrarTela("operatorScreen");
+      carregarPainelOperador();
+    };
+
+    window.abrirGestor = function () {
+      const senha = prompt("Digite a senha do gestor:");
+      if (senha !== "1234") {
+        showToast("Senha incorreta.", "error");
+        return;
+      }
+
+      state.perfil = "gestor";
+      mostrarTela("managerScreen");
+      carregarPainelGestor();
+    };
+
+    window.voltarAoLogin = function () {
+      state.perfil = null;
+      state.viagemId = null;
+      state.viagem = null;
+      state.despesas = [];
+      mostrarTela("loginScreen");
+    };
+
+    window.criarViagem = async function () {
+      const payload = {
+        motorista: el.motorista.value.trim(),
+        origem: el.origem.value.trim(),
+        destino: el.destino.value.trim(),
+        localCarga: el.localCarga.value.trim(),
+        dataCarga: el.dataCarga.value,
+        localDescarga: el.localDescarga.value.trim(),
+        dataDescarga: el.dataDescarga.value,
+        frete: Number(el.frete.value || 0),
+        status: "aberta",
+        criadoEm: Date.now()
+      };
+
+      if (!payload.motorista || !payload.origem || !payload.destino) {
+        showToast("Preencha motorista, origem e destino.", "warning");
+        return;
+      }
+
+      if (payload.frete <= 0) {
+        showToast("Informe um frete válido.", "warning");
+        return;
+      }
+
+      await addDoc(collection(db, "viagens"), payload);
+
+      limparFormularioViagem();
+      showToast("Viagem criada com sucesso.", "info");
+      carregarPainelOperador();
+    };
+
+    window.abrirViagem = async function (viagemId) {
+      await abrirDetalheViagem(viagemId);
+    };
+
+    window.adicionarDespesa = async function () {
+      if (!state.viagem || !state.viagemId) return;
+
+      if (state.viagem.status !== "aberta") {
+        showToast("Não é possível adicionar despesas após finalizar ou aprovar a viagem.", "warning");
+        return;
+      }
+
+      const valor = Number(el.valorDespesa.value || 0);
+      if (valor <= 0) {
+        showToast("Não é permitido adicionar despesa com valor 0.", "warning");
+        return;
+      }
+
+      const tipo = el.tipoDespesa.value;
+      if (!tipo) {
+        showToast("Selecione o tipo da despesa.", "warning");
+        return;
+      }
+
+      await addDoc(collection(db, "viagens", state.viagemId, "despesas"), {
+        tipo,
+        valor,
+        valorOriginal: valor,
+        corrigido: false,
+        divergenciaPendente: false,
+        motivoCorrecao: "",
+        criadoEm: Date.now()
+      });
+
+      el.valorDespesa.value = "";
+      await atualizarViagemNoEstado();
+      renderDetalhe();
+    };
+
+    window.finalizarViagem = async function () {
+      if (!state.viagem || !state.viagemId) return;
+
+      if (state.perfil !== "operador") {
+        showToast("Somente o operador pode finalizar a viagem.", "warning");
+        return;
+      }
+
+      if (state.viagem.status !== "aberta") {
+        showToast("Essa viagem já foi finalizada anteriormente.", "warning");
+        return;
+      }
+
+      await updateDoc(doc(db, "viagens", state.viagemId), {
+        status: "concluida"
+      });
+
+      await atualizarViagemNoEstado();
+      renderDetalhe();
+      showToast("Viagem finalizada. Agora ela aguarda aprovação do gestor.", "info");
+    };
+
+    window.corrigirDespesa = async function (despesaId) {
+      if (state.perfil !== "gestor") {
+        showToast("Somente o gestor pode corrigir valores.", "warning");
+        return;
+      }
+
+      if (!state.viagemId) return;
+
+      const despesa = state.despesas.find((d) => d.id === despesaId);
+      if (!despesa) return;
+
+      const novoValorTexto = prompt(
+        `Valor atual: ${formatCurrency(despesa.valor)}\nDigite o valor correto:`,
+        despesa.valor
+      );
+
+      if (novoValorTexto === null) return;
+
+      const novoValor = Number(String(novoValorTexto).replace(",", "."));
+      if (!Number.isFinite(novoValor) || novoValor <= 0) {
+        showToast("Valor corrigido inválido.", "warning");
+        return;
+      }
+
+      const motivo = prompt("Digite o motivo da divergência:", despesa.motivoCorrecao || "");
+      if (motivo === null) return;
+
+      await updateDoc(doc(db, "viagens", state.viagemId, "despesas", despesaId), {
+        valor: novoValor,
+        valorOriginal: Number(despesa.valorOriginal ?? despesa.valor ?? 0),
+        corrigido: true,
+        divergenciaPendente: false,
+        motivoCorrecao: motivo.trim()
+      });
+
+      await atualizarViagemNoEstado();
+      renderDetalhe();
+      showToast("Despesa corrigida com sucesso.", "info");
+    };
+
+    window.aprovarViagem = async function () {
+      if (state.perfil !== "gestor") {
+        showToast("Somente o gestor pode aprovar viagens.", "warning");
+        return;
+      }
+
+      if (!state.viagem || !state.viagemId) return;
+
+      if (state.viagem.status !== "concluida") {
+        showToast("Somente viagens concluídas podem ser aprovadas.", "warning");
+        return;
+      }
+
+      if (hasPendenciaNaoCorrigida(state.despesas)) {
+        showToast("Há divergências pendentes. Corrija antes de aprovar.", "warning");
+        return;
+      }
+
+      await updateDoc(doc(db, "viagens", state.viagemId), {
+        status: "aprovada"
+      });
+
+      await atualizarViagemNoEstado();
+      renderDetalhe();
+      showToast("Viagem aprovada com sucesso.", "info");
+    };
+
+    window.voltarDaViagem = async function () {
+      if (state.perfil === "gestor") {
+        mostrarTela("managerScreen");
+        await carregarPainelGestor();
+      } else {
+        mostrarTela("operatorScreen");
+        await carregarPainelOperador();
+      }
+    };
+
+    mostrarTela("loginScreen");
+  </script>
+</body>
+</html>
