@@ -3,9 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gestão Transporte PRO</title>
+<title>Transportes PRO</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
+
+/* FUNDO */
 body {
   margin:0;
   font-family:'Segoe UI', sans-serif;
@@ -14,26 +18,34 @@ body {
   justify-content:center;
 }
 
-.app { width:100%; max-width:520px; }
+/* APP */
+.app {
+  width:100%;
+  max-width:520px;
+}
 
+/* HEADER */
 .header {
   color:#fff;
   padding:20px;
   text-align:center;
-  font-size:20px;
+  font-size:22px;
   font-weight:600;
 }
 
+/* CONTAINER */
 .container { padding:15px; }
 
+/* CARD */
 .card {
   background:#fff;
   border-radius:16px;
   padding:16px;
   margin-top:12px;
-  box-shadow:0 10px 25px rgba(0,0,0,0.15);
+  box-shadow:0 12px 25px rgba(0,0,0,0.12);
 }
 
+/* BOTÕES */
 button {
   width:100%;
   padding:14px;
@@ -43,8 +55,10 @@ button {
   background:#0ea5e9;
   color:#fff;
   font-weight:600;
+  font-size:15px;
 }
 
+/* INPUT */
 input, select {
   width:100%;
   padding:12px;
@@ -53,6 +67,7 @@ input, select {
   border:1px solid #e5e7eb;
 }
 
+/* STATUS */
 .status {
   padding:5px 10px;
   border-radius:10px;
@@ -64,29 +79,43 @@ input, select {
 .aprovada { background:#16a34a; color:#fff;}
 
 .hidden { display:none; }
+
+/* DESPESAS */
+.despesa {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px;
+}
+
+.despesa i {
+  font-size:18px;
+  width:25px;
+  text-align:center;
+}
+
 </style>
+
 </head>
 
 <body>
 
 <div class="app">
-<div class="header">🚛 Transporte PRO</div>
+<div class="header">🚛 Transportes PRO</div>
 
 <div class="container">
 
 <div id="login" class="card">
-<button onclick="entrarOperador()">Operador</button>
-<button onclick="entrarGestor()">Gestor</button>
+<button onclick="entrarOperador()">👷 Operador</button>
+<button onclick="entrarGestor()">📊 Gestor</button>
 </div>
 
-<!-- OPERADOR -->
 <div id="operador" class="hidden">
 
 <div class="card">
 <h3>Nova Viagem</h3>
 
 <input id="motorista" placeholder="Motorista">
-
 <input id="origem" placeholder="Cidade Origem">
 <input id="destino" placeholder="Cidade Destino">
 
@@ -105,12 +134,10 @@ input, select {
 
 </div>
 
-<!-- GESTOR -->
 <div id="gestor" class="hidden">
 <div id="dashboard"></div>
 </div>
 
-<!-- DETALHE -->
 <div id="detalhe" class="hidden">
 
 <button onclick="voltar()">⬅ Voltar</button>
@@ -121,15 +148,11 @@ input, select {
 </div>
 
 <div class="card">
-
 <select id="tipo"></select>
 <input id="valor" placeholder="Valor">
-
 <button onclick="addDespesa()">Adicionar</button>
 <button id="btnFinalizar" onclick="finalizar()">Finalizar</button>
-
 <div id="btnAprovar"></div>
-
 </div>
 
 <div id="listaDespesas"></div>
@@ -153,31 +176,27 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-let perfil = null;
-let viagemAtual = null;
-let statusAtual = null;
-let freteAtual = 0;
+let perfil, viagemAtual, statusAtual, freteAtual;
+
+/* ICONES */
+const icones = {
+  "COMBUSTIVEL":"fa-gas-pump",
+  "PEDAGIO":"fa-road",
+  "MANUTENCAO":"fa-wrench",
+  "BORRACHARIA":"fa-tire",
+  "OLEO":"fa-oil-can",
+  "TRIAGEM":"fa-box",
+  "QUEBRA FRETE":"fa-triangle-exclamation",
+  "ADIANTAMENTO":"fa-money-bill",
+  "COMISSAO":"fa-user"
+};
 
 /* LOGIN */
-window.entrarOperador = ()=>{
-perfil="operador";
-login.style.display="none";
-operador.classList.remove("hidden");
-carregarOperador();
-}
-
-window.entrarGestor = ()=>{
-if(prompt("Senha")=="1234"){
-perfil="gestor";
-login.style.display="none";
-gestor.classList.remove("hidden");
-carregarGestor();
-}
-}
+window.entrarOperador=()=>{perfil="operador";login.style.display="none";operador.classList.remove("hidden");carregarOperador();}
+window.entrarGestor=()=>{if(prompt("Senha")=="1234"){perfil="gestor";login.style.display="none";gestor.classList.remove("hidden");carregarGestor();}}
 
 /* CRIAR */
-window.criarViagem = async ()=>{
-
+window.criarViagem=async()=>{
 await addDoc(collection(db,"viagens"),{
 motorista: motorista.value,
 origem: origem.value,
@@ -189,7 +208,6 @@ dataDescarga: dataDescarga.value,
 frete: Number(frete.value),
 status:"aberta"
 });
-
 carregarOperador();
 }
 
@@ -197,50 +215,46 @@ carregarOperador();
 function carregarTipos(){
 let base=["COMBUSTIVEL","OLEO","TRIAGEM","BORRACHARIA","MANUTENCAO","PEDAGIO","QUEBRA FRETE"];
 let extra=["ADIANTAMENTO","COMISSAO"];
-
 let lista = perfil==="gestor" ? [...base,...extra] : base;
-
 tipo.innerHTML = lista.map(x=>`<option>${x}</option>`).join("");
 }
 
 /* LISTAS */
 async function carregarOperador(){
-let snap = await getDocs(collection(db,"viagens"));
+let snap=await getDocs(collection(db,"viagens"));
 let html="";
 snap.forEach(d=>{
 let v=d.data();
 html+=`<div class="card" onclick="abrir('${d.id}')">
-${v.motorista}<br>${v.origem} → ${v.destino}
-<span class="status ${v.status}">${v.status}</span>
+<b>${v.motorista}</b><br>${v.origem} → ${v.destino}
 </div>`;
 });
 listaOperador.innerHTML=html;
 }
 
 async function carregarGestor(){
-let snap = await getDocs(collection(db,"viagens"));
+let snap=await getDocs(collection(db,"viagens"));
 let html="";
 for(let d of snap.docs){
 let v=d.data();
 html+=`<div class="card" onclick="abrirGestor('${d.id}')">
-${v.motorista}<br>${v.origem} → ${v.destino}
-<span class="status ${v.status}">${v.status}</span>
+<b>${v.motorista}</b><br>${v.origem} → ${v.destino}
 </div>`;
 }
 dashboard.innerHTML=html;
 }
 
 /* ABRIR */
-window.abrir = async(id)=>{
+window.abrir=async(id)=>{
 viagemAtual=id;
 operador.classList.add("hidden");
 detalhe.classList.remove("hidden");
 
-let snap = await getDocs(collection(db,"viagens"));
+let snap=await getDocs(collection(db,"viagens"));
 snap.forEach(d=>{
 if(d.id===id){
 let v=d.data();
-titulo.innerText = v.motorista+" - "+v.origem+" → "+v.destino;
+titulo.innerText=v.motorista+" - "+v.origem+" → "+v.destino;
 freteAtual=v.frete;
 statusAtual=v.status;
 }
@@ -250,88 +264,60 @@ carregarTipos();
 carregarDetalhe();
 }
 
-window.abrirGestor = async(id)=>{
-gestor.classList.add("hidden");
-await abrir(id);
-}
+window.abrirGestor=async(id)=>{gestor.classList.add("hidden");await abrir(id);}
 
 /* DETALHE */
 async function carregarDetalhe(){
-
-let snap = await getDocs(collection(db,"viagens",viagemAtual,"despesas"));
+let snap=await getDocs(collection(db,"viagens",viagemAtual,"despesas"));
 let html="",total=0;
 
 snap.forEach(d=>{
-html+=`<div class="card">${d.data().tipo} - ${d.data().valor}</div>`;
+let tipo=d.data().tipo;
+html+=`
+<div class="card despesa">
+<i class="fa ${icones[tipo] || 'fa-circle'}"></i>
+<div>${tipo} - R$ ${d.data().valor}</div>
+</div>`;
 total+=d.data().valor;
 });
 
 listaDespesas.innerHTML=html;
-
 resumo.innerHTML=`Frete: ${freteAtual}<br>Despesa: ${total}<br>Lucro: ${freteAtual-total}`;
 
-/* BLOQUEIOS */
-if(statusAtual==="concluida"||statusAtual==="aprovada"){
-btnFinalizar.style.display="none";
-}else{
-btnFinalizar.style.display="block";
-}
-
-if(perfil==="gestor" && statusAtual==="concluida"){
+if(statusAtual==="concluida" && perfil==="gestor"){
 btnAprovar.innerHTML=`<button onclick="aprovarAtual()">Aprovar</button>`;
 }else{
 btnAprovar.innerHTML="";
 }
 }
 
-/* ADD DESPESA */
-window.addDespesa = async ()=>{
-
-if(statusAtual!=="aberta"){
-alert("Viagem já finalizada!");
-return;
-}
-
-if(Number(valor.value)<=0){
-alert("Valor inválido!");
-return;
-}
-
+/* ADD */
+window.addDespesa=async()=>{
+if(Number(valor.value)<=0){alert("Valor inválido");return;}
 await addDoc(collection(db,"viagens",viagemAtual,"despesas"),{
 tipo: tipo.value,
 valor: Number(valor.value)
 });
-
 carregarDetalhe();
 }
 
 /* FINALIZAR */
-window.finalizar = async ()=>{
-if(statusAtual!=="aberta"){
-alert("Já finalizada!");
-return;
-}
+window.finalizar=async()=>{
 await updateDoc(doc(db,"viagens",viagemAtual),{status:"concluida"});
 voltar();
 }
 
 /* APROVAR */
-window.aprovarAtual = async ()=>{
+window.aprovarAtual=async()=>{
 await updateDoc(doc(db,"viagens",viagemAtual),{status:"aprovada"});
 voltar();
 }
 
 /* VOLTAR */
-window.voltar = ()=>{
+window.voltar=()=>{
 detalhe.classList.add("hidden");
-
-if(perfil==="gestor"){
-gestor.classList.remove("hidden");
-carregarGestor();
-}else{
-operador.classList.remove("hidden");
-carregarOperador();
-}
+if(perfil==="gestor"){gestor.classList.remove("hidden");carregarGestor();}
+else{operador.classList.remove("hidden");carregarOperador();}
 }
 
 </script>
