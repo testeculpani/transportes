@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestão de Viagens</title>
+
+<style>
+body {
+  margin:0;
+  font-family: Arial;
+  background:#f4f6f8;
+}
+
+.header {
+  background:#1e3a8a;
+  color:#fff;
+  padding:15px;
+  text-align:center;
+  font-weight:bold;
+}
+
+.container {
+  padding:15px;
+}
+
+.card {
+  background:#fff;
+  padding:15px;
+  border-radius:10px;
+  margin-bottom:15px;
+  box-shadow:0 5px 10px rgba(0,0,0,0.05);
+}
+
+button {
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border:none;
+  border-radius:8px;
+  background:#2563eb;
+  color:#fff;
+  font-weight:bold;
+}
+
+input {
+  width:100%;
+  padding:10px;
+  margin-top:8px;
+  border-radius:8px;
+  border:1px solid #ccc;
+}
+
+.kpi {
+  display:flex;
+  justify-content:space-between;
+}
+
+.kpi div {
+  width:32%;
+  text-align:center;
+}
+
+.green { color:green; font-weight:bold;}
+.red { color:red; font-weight:bold;}
+
+.hidden { display:none; }
+
+</style>
+</head>
+
+<body>
+
+<div class="header">Sistema de Gestão de Viagens</div>
+
+<div class="container">
+
+<!-- LOGIN -->
+<div id="login">
+
+<div class="card">
+<button onclick="entrarOperador()">👷 Operador</button>
+<button onclick="entrarGestor()">📊 Gestor</button>
+</div>
+
+</div>
+
+<!-- OPERADOR -->
+<div id="operador" class="hidden">
+
+<div class="card">
+<h3>Nova Viagem</h3>
+
+<input id="origem" placeholder="Origem">
+<input id="destino" placeholder="Destino">
+<input id="frete" type="number" placeholder="Frete">
+
+<h4>Despesas</h4>
+
+<input id="diesel" type="number" placeholder="Diesel">
+<input id="arla" type="number" placeholder="Arla">
+<input id="pedagio" type="number" placeholder="Pedágio">
+<input id="comissao" type="number" placeholder="Comissão">
+<input id="outros" type="number" placeholder="Outros">
+
+<button onclick="salvar()">Finalizar Viagem</button>
+
+</div>
+
+</div>
+
+<!-- GESTOR -->
+<div id="gestor" class="hidden">
+
+<div class="card">
+<h3>Painel Gestão</h3>
+
+<div id="lista"></div>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+function entrarOperador(){
+  document.getElementById("login").style.display="none";
+  document.getElementById("operador").style.display="block";
+}
+
+function entrarGestor(){
+  let senha = prompt("Digite a senha:");
+  if(senha == "1234"){
+    document.getElementById("login").style.display="none";
+    document.getElementById("gestor").style.display="block";
+    carregar();
+  } else {
+    alert("Senha incorreta");
+  }
+}
+
+function salvar(){
+
+let viagem = {
+  origem: document.getElementById("origem").value,
+  destino: document.getElementById("destino").value,
+  frete: Number(document.getElementById("frete").value) || 0,
+  diesel: Number(document.getElementById("diesel").value) || 0,
+  arla: Number(document.getElementById("arla").value) || 0,
+  pedagio: Number(document.getElementById("pedagio").value) || 0,
+  comissao: Number(document.getElementById("comissao").value) || 0,
+  outros: Number(document.getElementById("outros").value) || 0,
+};
+
+viagem.despesa = viagem.diesel + viagem.arla + viagem.pedagio + viagem.comissao + viagem.outros;
+viagem.lucro = viagem.frete - viagem.despesa;
+
+let lista = JSON.parse(localStorage.getItem("viagens")) || [];
+lista.push(viagem);
+localStorage.setItem("viagens", JSON.stringify(lista));
+
+alert("Viagem salva!");
+
+document.querySelectorAll("input").forEach(i => i.value="");
+
+}
+
+function carregar(){
+
+let lista = JSON.parse(localStorage.getItem("viagens")) || [];
+let html = "";
+
+lista.reverse().forEach(v => {
+
+html += `
+<div class="card">
+<b>${v.origem} → ${v.destino}</b><br><br>
+
+Receita: R$ ${v.frete.toFixed(2)}<br>
+Despesa: R$ ${v.despesa.toFixed(2)}<br>
+Lucro: <span class="${v.lucro >=0 ? 'green':'red'}">R$ ${v.lucro.toFixed(2)}</span>
+
+</div>
+`;
+
+});
+
+document.getElementById("lista").innerHTML = html;
+
+}
+
+</script>
+
+</body>
+</html>
