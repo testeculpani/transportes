@@ -6,8 +6,6 @@
 <title>Gestão de Transportes</title>
 
 <style>
-
-/* FUNDO */
 body {
   margin:0;
   font-family:'Segoe UI', sans-serif;
@@ -16,13 +14,11 @@ body {
   justify-content:center;
 }
 
-/* ÁREA CENTRAL */
 .app {
   width:100%;
   max-width:500px;
 }
 
-/* HEADER */
 .header {
   color:#fff;
   padding:20px;
@@ -31,12 +27,10 @@ body {
   font-weight:600;
 }
 
-/* CONTAINER */
 .container {
   padding:15px;
 }
 
-/* CARD */
 .card {
   background:#fff;
   border-radius:16px;
@@ -45,7 +39,6 @@ body {
   box-shadow:0 10px 25px rgba(0,0,0,0.15);
 }
 
-/* BOTÕES */
 button {
   width:100%;
   padding:14px;
@@ -62,8 +55,7 @@ button.secondary {
   background:#111827;
 }
 
-/* INPUT */
-input {
+input, select {
   width:100%;
   padding:12px;
   margin-top:10px;
@@ -71,7 +63,6 @@ input {
   border:1px solid #e5e7eb;
 }
 
-/* STATUS */
 .status {
   padding:5px 10px;
   border-radius:10px;
@@ -82,14 +73,11 @@ input {
 .concluida { background:#3b82f6; color:#fff;}
 .aprovada { background:#16a34a; color:#fff;}
 
-/* TEXTO */
 .lucroPos { color:#16a34a; font-weight:600;}
 .lucroNeg { color:#dc2626; font-weight:600;}
 
 .hidden { display:none; }
-
 </style>
-
 </head>
 
 <body>
@@ -138,10 +126,13 @@ input {
 
 <div class="card">
 <h4>Adicionar Despesa</h4>
-<input id="tipo" placeholder="Tipo">
+
+<select id="tipo"></select>
 <input id="valor" placeholder="Valor">
+
 <button onclick="addDespesa()">Adicionar</button>
 <button onclick="finalizar()">Finalizar</button>
+
 <div id="btnAprovar"></div>
 </div>
 
@@ -194,67 +185,72 @@ carregarGestor();
 
 /* CRIAR */
 window.criarViagem = async function(){
-
 await addDoc(collection(db,"viagens"),{
 origem: origem.value,
 destino: destino.value,
 frete: Number(frete.value),
 status:"aberta"
 });
-
 carregarOperador();
 }
 
 /* OPERADOR */
 async function carregarOperador(){
-
 let snap = await getDocs(collection(db,"viagens"));
 let html="";
-
 snap.forEach(d=>{
 let v = d.data();
-
 html+=`
 <div class="card" onclick="abrir('${d.id}')">
 <b>${v.origem} → ${v.destino}</b><br>
 <span class="status ${v.status}">${v.status}</span>
-</div>
-`;
+</div>`;
 });
-
 listaOperador.innerHTML = html;
 }
 
 /* GESTOR */
 async function carregarGestor(){
-
 let snap = await getDocs(collection(db,"viagens"));
 let html="";
-
 for(let d of snap.docs){
-
 let v = d.data();
-
 let despSnap = await getDocs(collection(db,"viagens",d.id,"despesas"));
-
 let total=0;
 despSnap.forEach(x=> total+=x.data().valor);
-
 let lucro = v.frete - total;
-
 html+=`
 <div class="card" onclick="abrirGestor('${d.id}')">
 <b>${v.origem} → ${v.destino}</b><br>
 <span class="status ${v.status}">${v.status}</span><br><br>
 Lucro: <span class="${lucro>=0?'lucroPos':'lucroNeg'}">R$ ${lucro}</span>
-</div>
-`;
+</div>`;
 }
-
 dashboard.innerHTML = html;
 }
 
-/* DETALHE */
+/* TIPOS DESPESA */
+function carregarTiposDespesa(){
+
+let operadorTipos = [
+"COMBUSTIVEL","OLEO","TRIAGEM","BORRACHARIA","MANUTENCAO","PEDAGIO","QUEBRA FRETE"
+];
+
+let gestorExtras = [
+"ADIANTAMENTO","COMISSAO"
+];
+
+let lista = [...operadorTipos];
+
+if(perfil==="gestor"){
+lista = [...operadorTipos, ...gestorExtras];
+}
+
+tipo.innerHTML = lista.map(o=>`<option>${o}</option>`).join("");
+
+}
+
+/* ABRIR */
 window.abrir = async function(id){
 
 viagemAtual = id;
@@ -272,6 +268,7 @@ statusAtual = d.data().status;
 }
 });
 
+carregarTiposDespesa();
 carregarDetalhe();
 }
 
@@ -308,34 +305,28 @@ btnAprovar.innerHTML = "";
 }
 }
 
-/* DESPESA */
+/* ADD */
 window.addDespesa = async function(){
-
 await addDoc(collection(db,"viagens",viagemAtual,"despesas"),{
 tipo: tipo.value,
 valor: Number(valor.value)
 });
-
 carregarDetalhe();
 }
 
 /* FINALIZAR */
 window.finalizar = async function(){
-
 await updateDoc(doc(db,"viagens",viagemAtual),{
 status:"concluida"
 });
-
 voltar();
 }
 
 /* APROVAR */
 window.aprovarAtual = async function(){
-
 await updateDoc(doc(db,"viagens",viagemAtual),{
 status:"aprovada"
 });
-
 voltar();
 }
 
