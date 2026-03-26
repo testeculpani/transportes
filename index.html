@@ -3,57 +3,70 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fleet Control</title>
+<title>Gestão de Transportes</title>
 
 <style>
+
+/* FUNDO GRILAZER */
 body {
   margin:0;
   font-family:'Segoe UI', sans-serif;
-  background:#eef2f7;
+  background: linear-gradient(135deg,#0ea5e9,#0284c7);
+  color:#1e293b;
 }
 
+/* HEADER */
 .header {
-  background:linear-gradient(90deg,#1e3a8a,#2563eb);
   color:#fff;
   padding:18px;
+  font-size:20px;
   font-weight:600;
 }
 
-.container { padding:20px; }
+/* CONTAINER */
+.container {
+  padding:15px;
+}
 
+/* CARD PADRÃO */
+.card {
+  background:#fff;
+  border-radius:16px;
+  padding:16px;
+  margin-top:12px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.1);
+}
+
+/* BOTÕES */
 button {
+  width:100%;
+  padding:14px;
+  margin-top:10px;
+  border:none;
+  border-radius:12px;
+  background:#0ea5e9;
+  color:#fff;
+  font-weight:600;
+  font-size:15px;
+}
+
+button.secondary {
+  background:#111827;
+}
+
+/* INPUT */
+input {
   width:100%;
   padding:12px;
   margin-top:10px;
-  border:none;
-  border-radius:10px;
-  background:#2563eb;
-  color:#fff;
-  font-weight:600;
+  border-radius:12px;
+  border:1px solid #e5e7eb;
 }
 
-.card {
-  background:#fff;
-  padding:18px;
-  border-radius:14px;
-  margin-top:12px;
-  box-shadow:0 8px 20px rgba(0,0,0,0.05);
-}
-
-.kpis {
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-}
-
-.kpi {
-  flex:1;
-  text-align:center;
-}
-
+/* STATUS */
 .status {
   padding:5px 10px;
-  border-radius:8px;
+  border-radius:10px;
   font-size:12px;
 }
 
@@ -64,33 +77,28 @@ button {
 .lucroPos { color:#16a34a; font-weight:600;}
 .lucroNeg { color:#dc2626; font-weight:600;}
 
-input {
-  width:100%;
-  padding:12px;
-  margin-top:10px;
-  border-radius:10px;
-  border:1px solid #d1d5db;
-}
-
 .hidden { display:none; }
+
 </style>
 
 </head>
 
 <body>
 
-<div class="header">🚛 Fleet Control</div>
+<div class="header">🚛 Gestão Grilazer</div>
 
 <div class="container">
 
 <!-- LOGIN -->
-<div id="login">
-<button onclick="entrarOperador()">Operador</button>
-<button onclick="entrarGestor()">Gestor</button>
+<div id="login" class="card">
+<button onclick="entrarOperador()">👷 Operador</button>
+<button class="secondary" onclick="entrarGestor()">📊 Gestor</button>
 </div>
 
 <!-- OPERADOR -->
 <div id="operador" class="hidden">
+
+<div class="card">
 <h3>Nova Viagem</h3>
 
 <input id="origem" placeholder="Origem">
@@ -98,8 +106,10 @@ input {
 <input id="frete" placeholder="Frete">
 
 <button onclick="criarViagem()">Criar Viagem</button>
+</div>
 
 <div id="listaOperador"></div>
+
 </div>
 
 <!-- GESTOR -->
@@ -112,17 +122,21 @@ input {
 
 <button onclick="voltar()">⬅ Voltar</button>
 
+<div class="card">
 <h3 id="titulo"></h3>
-
 <div id="resumo"></div>
+</div>
 
+<div class="card">
 <h4>Adicionar Despesa</h4>
 <input id="tipo" placeholder="Tipo">
 <input id="valor" placeholder="Valor">
 
 <button onclick="addDespesa()">Adicionar</button>
 <button onclick="finalizar()">Finalizar</button>
-<button onclick="aprovarAtual()">Aprovar</button>
+
+<div id="btnAprovar"></div>
+</div>
 
 <div id="listaDespesas"></div>
 
@@ -130,17 +144,11 @@ input {
 
 </div>
 
-<!-- FIREBASE -->
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
-  getFirestore,
-  collection,
-  addDoc,
-  getDocs,
-  doc,
-  updateDoc
+  getFirestore, collection, addDoc, getDocs, doc, updateDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -154,9 +162,12 @@ const db = getFirestore(app);
 
 let viagemAtual = null;
 let freteAtual = 0;
+let perfil = null;
+let statusAtual = null;
 
 /* LOGIN */
 window.entrarOperador = function(){
+perfil = "operador";
 login.style.display="none";
 operador.classList.remove("hidden");
 carregarOperador();
@@ -165,6 +176,7 @@ carregarOperador();
 window.entrarGestor = function(){
 let s = prompt("Senha:");
 if(s==="1234"){
+perfil = "gestor";
 login.style.display="none";
 gestor.classList.remove("hidden");
 carregarGestor();
@@ -208,11 +220,7 @@ listaOperador.innerHTML = html;
 async function carregarGestor(){
 
 let snap = await getDocs(collection(db,"viagens"));
-
 let html="";
-let total=0;
-let lucroTotal=0;
-let dadosGrafico=[];
 
 for(let d of snap.docs){
 
@@ -220,42 +228,24 @@ let v = d.data();
 
 let despSnap = await getDocs(collection(db,"viagens",d.id,"despesas"));
 
-let totalDesp=0;
-despSnap.forEach(x=> totalDesp+=x.data().valor);
+let total=0;
+despSnap.forEach(x=> total+=x.data().valor);
 
-let lucro = v.frete - totalDesp;
-
-total++;
-lucroTotal += lucro;
-dadosGrafico.push(lucro);
+let lucro = v.frete - total;
 
 html+=`
 <div class="card" onclick="abrirGestor('${d.id}')">
 <b>${v.origem} → ${v.destino}</b><br>
 <span class="status ${v.status}">${v.status}</span><br><br>
-
-Receita: ${v.frete}<br>
-Despesa: ${totalDesp}<br>
 Lucro: <span class="${lucro>=0?'lucroPos':'lucroNeg'}">R$ ${lucro}</span>
 </div>
 `;
 }
 
-dashboard.innerHTML = `
-<div class="kpis">
-<div class="card kpi">Viagens<br><b>${total}</b></div>
-<div class="card kpi">Lucro Total<br><b>R$ ${lucroTotal}</b></div>
-</div>
-
-<canvas id="grafico" height="120"></canvas>
-
-${html}
-`;
-
-desenharGrafico(dadosGrafico);
+dashboard.innerHTML = html;
 }
 
-/* DETALHE OPERADOR */
+/* DETALHE */
 window.abrir = async function(id){
 
 viagemAtual = id;
@@ -269,13 +259,13 @@ snap.forEach(d=>{
 if(d.id===id){
 titulo.innerText = d.data().origem+" → "+d.data().destino;
 freteAtual = d.data().frete;
+statusAtual = d.data().status;
 }
 });
 
 carregarDetalhe();
 }
 
-/* DETALHE GESTOR */
 window.abrirGestor = async function(id){
 gestor.classList.add("hidden");
 await abrir(id);
@@ -301,6 +291,13 @@ Receita: R$ ${freteAtual}<br>
 Despesa: R$ ${total}<br>
 Lucro: <b class="${freteAtual-total>=0?'lucroPos':'lucroNeg'}">R$ ${freteAtual-total}</b>
 `;
+
+/* PERMISSÃO */
+if(perfil==="gestor" && statusAtual==="concluida"){
+btnAprovar.innerHTML = `<button onclick="aprovarAtual()">Aprovar</button>`;
+}else{
+btnAprovar.innerHTML = "";
+}
 }
 
 /* DESPESA */
@@ -321,7 +318,6 @@ await updateDoc(doc(db,"viagens",viagemAtual),{
 status:"concluida"
 });
 
-alert("Finalizada");
 voltar();
 }
 
@@ -332,31 +328,20 @@ await updateDoc(doc(db,"viagens",viagemAtual),{
 status:"aprovada"
 });
 
-alert("Aprovada");
 voltar();
 }
 
 /* VOLTAR */
 window.voltar = function(){
 detalhe.classList.add("hidden");
+
+if(perfil==="gestor"){
 gestor.classList.remove("hidden");
 carregarGestor();
+}else{
+operador.classList.remove("hidden");
+carregarOperador();
 }
-
-/* GRÁFICO */
-function desenharGrafico(dados){
-
-let canvas = document.getElementById("grafico");
-if(!canvas) return;
-
-let ctx = canvas.getContext("2d");
-
-ctx.clearRect(0,0,300,150);
-
-dados.forEach((v,i)=>{
-ctx.fillStyle = v>=0 ? "green":"red";
-ctx.fillRect(i*30,150-v/10,20,v/10);
-});
 }
 
 </script>
