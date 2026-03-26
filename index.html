@@ -3,66 +3,96 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gestão de Transportes</title>
+<title>Fleet Control</title>
 
 <style>
-body { font-family: Arial; margin:0; background:#f4f6f8;}
-.header { background:#1e3a8a; color:#fff; padding:15px; font-weight:bold;}
-.container { padding:15px;}
+body {
+  margin:0;
+  font-family:'Segoe UI', sans-serif;
+  background:#eef2f7;
+}
+
+.header {
+  background:linear-gradient(90deg,#1e3a8a,#2563eb);
+  color:#fff;
+  padding:18px;
+  font-weight:600;
+}
+
+.container { padding:20px; }
 
 button {
   width:100%;
   padding:12px;
   margin-top:10px;
   border:none;
-  border-radius:8px;
+  border-radius:10px;
   background:#2563eb;
   color:#fff;
-  font-weight:bold;
+  font-weight:600;
 }
 
 .card {
   background:#fff;
-  padding:15px;
-  border-radius:10px;
-  margin-top:10px;
+  padding:18px;
+  border-radius:14px;
+  margin-top:12px;
+  box-shadow:0 8px 20px rgba(0,0,0,0.05);
 }
 
-input {
-  width:100%;
-  padding:10px;
-  margin-top:8px;
+.kpis {
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.kpi {
+  flex:1;
+  text-align:center;
 }
 
 .status {
   padding:5px 10px;
-  border-radius:5px;
+  border-radius:8px;
   font-size:12px;
 }
 
-.aberta { background:orange; color:#fff;}
-.concluida { background:#2563eb; color:#fff;}
-.aprovada { background:green; color:#fff;}
+.aberta { background:#f59e0b; color:#fff;}
+.concluida { background:#3b82f6; color:#fff;}
+.aprovada { background:#16a34a; color:#fff;}
+
+.lucroPos { color:#16a34a; font-weight:600;}
+.lucroNeg { color:#dc2626; font-weight:600;}
+
+input {
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border-radius:10px;
+  border:1px solid #d1d5db;
+}
 
 .hidden { display:none; }
-
 </style>
+
 </head>
 
 <body>
 
-<div class="header">🚛 Gestão de Transportes</div>
+<div class="header">🚛 Fleet Control</div>
 
 <div class="container">
 
+<!-- LOGIN -->
 <div id="login">
-<button onclick="operador()">Operador</button>
-<button onclick="gestor()">Gestor</button>
+<button onclick="entrarOperador()">Operador</button>
+<button onclick="entrarGestor()">Gestor</button>
 </div>
 
-<div id="telaOperador" class="hidden">
-
+<!-- OPERADOR -->
+<div id="operador" class="hidden">
 <h3>Nova Viagem</h3>
+
 <input id="origem" placeholder="Origem">
 <input id="destino" placeholder="Destino">
 <input id="frete" placeholder="Frete">
@@ -70,15 +100,15 @@ input {
 <button onclick="criarViagem()">Criar Viagem</button>
 
 <div id="listaOperador"></div>
-
 </div>
 
-<div id="telaGestor" class="hidden">
-<h3>Painel Gestor</h3>
-<div id="listaGestor"></div>
+<!-- GESTOR -->
+<div id="gestor" class="hidden">
+<div id="dashboard"></div>
 </div>
 
-<div id="telaDetalhe" class="hidden">
+<!-- DETALHE -->
+<div id="detalhe" class="hidden">
 
 <button onclick="voltar()">⬅ Voltar</button>
 
@@ -91,9 +121,10 @@ input {
 <input id="valor" placeholder="Valor">
 
 <button onclick="addDespesa()">Adicionar</button>
-<button onclick="finalizar()">Finalizar Viagem</button>
+<button onclick="finalizar()">Finalizar</button>
+<button onclick="aprovarAtual()">Aprovar</button>
 
-<div id="despesas"></div>
+<div id="listaDespesas"></div>
 
 </div>
 
@@ -121,39 +152,40 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+let viagemAtual = null;
+let freteAtual = 0;
+
 /* LOGIN */
-window.operador = function(){
-  login.style.display="none";
-  telaOperador.classList.remove("hidden");
-  carregarOperador();
+window.entrarOperador = function(){
+login.style.display="none";
+operador.classList.remove("hidden");
+carregarOperador();
 }
 
-window.gestor = function(){
-  let s = prompt("Senha:");
-  if(s === "1234"){
-    login.style.display="none";
-    telaGestor.classList.remove("hidden");
-    carregarGestor();
-  }
+window.entrarGestor = function(){
+let s = prompt("Senha:");
+if(s==="1234"){
+login.style.display="none";
+gestor.classList.remove("hidden");
+carregarGestor();
+}
 }
 
 /* CRIAR */
 window.criarViagem = async function(){
 
 await addDoc(collection(db,"viagens"),{
-  origem: origem.value,
-  destino: destino.value,
-  frete: Number(frete.value),
-  status:"aberta"
+origem: origem.value,
+destino: destino.value,
+frete: Number(frete.value),
+status:"aberta"
 });
 
-alert("Criado!");
 carregarOperador();
-
 }
 
 /* OPERADOR */
-window.carregarOperador = async function(){
+async function carregarOperador(){
 
 let snap = await getDocs(collection(db,"viagens"));
 let html="";
@@ -170,14 +202,17 @@ html+=`
 });
 
 listaOperador.innerHTML = html;
-
 }
 
 /* GESTOR */
-window.carregarGestor = async function(){
+async function carregarGestor(){
 
 let snap = await getDocs(collection(db,"viagens"));
+
 let html="";
+let total=0;
+let lucroTotal=0;
+let dadosGrafico=[];
 
 for(let d of snap.docs){
 
@@ -185,53 +220,68 @@ let v = d.data();
 
 let despSnap = await getDocs(collection(db,"viagens",d.id,"despesas"));
 
-let total=0;
-despSnap.forEach(x=> total+=x.data().valor);
+let totalDesp=0;
+despSnap.forEach(x=> totalDesp+=x.data().valor);
 
-let lucro = v.frete - total;
+let lucro = v.frete - totalDesp;
+
+total++;
+lucroTotal += lucro;
+dadosGrafico.push(lucro);
 
 html+=`
-<div class="card">
+<div class="card" onclick="abrirGestor('${d.id}')">
 <b>${v.origem} → ${v.destino}</b><br>
 <span class="status ${v.status}">${v.status}</span><br><br>
 
 Receita: ${v.frete}<br>
-Despesa: ${total}<br>
-Lucro: ${lucro}<br>
-
-${v.status==="concluida" ? `<button onclick="aprovar('${d.id}')">Aprovar</button>` : ""}
-
+Despesa: ${totalDesp}<br>
+Lucro: <span class="${lucro>=0?'lucroPos':'lucroNeg'}">R$ ${lucro}</span>
 </div>
 `;
 }
 
-listaGestor.innerHTML = html;
+dashboard.innerHTML = `
+<div class="kpis">
+<div class="card kpi">Viagens<br><b>${total}</b></div>
+<div class="card kpi">Lucro Total<br><b>R$ ${lucroTotal}</b></div>
+</div>
 
+<canvas id="grafico" height="120"></canvas>
+
+${html}
+`;
+
+desenharGrafico(dadosGrafico);
 }
 
-/* DETALHE */
-let viagemAtual = null;
-
+/* DETALHE OPERADOR */
 window.abrir = async function(id){
 
 viagemAtual = id;
 
-telaOperador.classList.add("hidden");
-telaDetalhe.classList.remove("hidden");
+operador.classList.add("hidden");
+detalhe.classList.remove("hidden");
 
-let docSnap = await getDocs(collection(db,"viagens"));
+let snap = await getDocs(collection(db,"viagens"));
 
-docSnap.forEach(d=>{
-if(d.id === id){
-titulo.innerText = d.data().origem + " → " + d.data().destino;
+snap.forEach(d=>{
+if(d.id===id){
+titulo.innerText = d.data().origem+" → "+d.data().destino;
 freteAtual = d.data().frete;
 }
 });
 
 carregarDetalhe();
-
 }
 
+/* DETALHE GESTOR */
+window.abrirGestor = async function(id){
+gestor.classList.add("hidden");
+await abrir(id);
+}
+
+/* DETALHE */
 async function carregarDetalhe(){
 
 let snap = await getDocs(collection(db,"viagens",viagemAtual,"despesas"));
@@ -240,18 +290,17 @@ let html="";
 let total=0;
 
 snap.forEach(d=>{
-html+=`<div>${d.data().tipo} - ${d.data().valor}</div>`;
+html+=`<div class="card">${d.data().tipo} - R$ ${d.data().valor}</div>`;
 total+=d.data().valor;
 });
 
-despesas.innerHTML = html;
+listaDespesas.innerHTML = html;
 
 resumo.innerHTML = `
-Receita: ${freteAtual}<br>
-Despesa: ${total}<br>
-Lucro: ${freteAtual-total}
+Receita: R$ ${freteAtual}<br>
+Despesa: R$ ${total}<br>
+Lucro: <b class="${freteAtual-total>=0?'lucroPos':'lucroNeg'}">R$ ${freteAtual-total}</b>
 `;
-
 }
 
 /* DESPESA */
@@ -263,7 +312,6 @@ valor: Number(valor.value)
 });
 
 carregarDetalhe();
-
 }
 
 /* FINALIZAR */
@@ -273,27 +321,42 @@ await updateDoc(doc(db,"viagens",viagemAtual),{
 status:"concluida"
 });
 
-alert("Finalizada!");
+alert("Finalizada");
 voltar();
-
 }
 
 /* APROVAR */
-window.aprovar = async function(id){
+window.aprovarAtual = async function(){
 
-await updateDoc(doc(db,"viagens",id),{
+await updateDoc(doc(db,"viagens",viagemAtual),{
 status:"aprovada"
 });
 
-carregarGestor();
-
+alert("Aprovada");
+voltar();
 }
 
 /* VOLTAR */
 window.voltar = function(){
-telaDetalhe.classList.add("hidden");
-telaOperador.classList.remove("hidden");
-carregarOperador();
+detalhe.classList.add("hidden");
+gestor.classList.remove("hidden");
+carregarGestor();
+}
+
+/* GRÁFICO */
+function desenharGrafico(dados){
+
+let canvas = document.getElementById("grafico");
+if(!canvas) return;
+
+let ctx = canvas.getContext("2d");
+
+ctx.clearRect(0,0,300,150);
+
+dados.forEach((v,i)=>{
+ctx.fillStyle = v>=0 ? "green":"red";
+ctx.fillRect(i*30,150-v/10,20,v/10);
+});
 }
 
 </script>
