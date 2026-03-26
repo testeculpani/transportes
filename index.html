@@ -5,469 +5,471 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gestão de Transportes</title>
 
+  <script src="https://widget.cloudinary.com/v2.0/global/all.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
   <style>
     * { box-sizing: border-box; }
 
-    :root {
-      --bg1: #0ea5e9;
-      --bg2: #0284c7;
-      --card: #ffffff;
-      --text: #0f172a;
-      --muted: #64748b;
-      --line: #e2e8f0;
-      --shadow: 0 14px 35px rgba(15, 23, 42, 0.14);
-      --primary: #0ea5e9;
-      --primary-dark: #0369a1;
-      --success: #16a34a;
-      --warning: #f59e0b;
-      --danger: #dc2626;
-      --info: #2563eb;
+    :root{
+      --bg1:#0ea5e9;
+      --bg2:#0284c7;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#64748b;
+      --line:#e2e8f0;
+      --shadow:0 14px 35px rgba(15,23,42,.14);
+      --primary:#0ea5e9;
+      --primary-dark:#0369a1;
+      --success:#16a34a;
+      --warning:#f59e0b;
+      --danger:#dc2626;
+      --info:#2563eb;
     }
 
-    body {
-      margin: 0;
-      font-family: "Segoe UI", Arial, sans-serif;
-      background: linear-gradient(135deg, var(--bg1), var(--bg2));
-      color: var(--text);
-      min-height: 100vh;
+    body{
+      margin:0;
+      font-family:"Segoe UI", Arial, sans-serif;
+      background:linear-gradient(135deg,var(--bg1),var(--bg2));
+      color:var(--text);
+      min-height:100vh;
     }
 
-    .app-shell {
-      width: 100%;
-      max-width: 760px;
-      margin: 0 auto;
-      padding: 18px 14px 24px;
+    .app-shell{
+      width:100%;
+      max-width:780px;
+      margin:0 auto;
+      padding:18px 14px 24px;
     }
 
-    .topbar {
-      color: #fff;
-      padding: 10px 4px 18px;
-      text-align: center;
+    .topbar{
+      color:#fff;
+      padding:8px 4px 18px;
+      text-align:center;
     }
 
-    .topbar h1 {
-      margin: 0;
-      font-size: 24px;
-      font-weight: 800;
-      letter-spacing: 0.2px;
+    .topbar h1{
+      margin:0;
+      font-size:24px;
+      font-weight:800;
+      letter-spacing:.2px;
     }
 
-    .topbar p {
-      margin: 6px 0 0;
-      opacity: 0.95;
-      font-size: 14px;
+    .topbar p{
+      margin:6px 0 0;
+      opacity:.95;
+      font-size:14px;
     }
 
-    .screen.hidden { display: none; }
-    .screen.active { display: block; }
+    .screen.hidden{ display:none; }
+    .screen.active{ display:block; }
 
-    .card {
-      background: var(--card);
-      border-radius: 20px;
-      padding: 16px;
-      margin-top: 14px;
-      box-shadow: var(--shadow);
-      border: 1px solid rgba(255,255,255,0.55);
+    .card{
+      background:var(--card);
+      border-radius:20px;
+      padding:16px;
+      margin-top:14px;
+      box-shadow:var(--shadow);
+      border:1px solid rgba(255,255,255,.55);
     }
 
-    .section-title {
-      margin: 0 0 10px;
-      font-size: 18px;
-      font-weight: 800;
+    .section-title{
+      margin:0 0 10px;
+      font-size:18px;
+      font-weight:800;
     }
 
-    .subtle {
-      color: var(--muted);
-      font-size: 13px;
+    .subtle{
+      color:var(--muted);
+      font-size:13px;
     }
 
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
+    .grid-2{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
     }
 
-    .grid-3 {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
+    .grid-3{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:10px;
     }
 
-    .grid-4 {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
+    .grid-4{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:10px;
     }
 
-    @media (max-width: 640px) {
-      .grid-2, .grid-3, .grid-4 {
-        grid-template-columns: 1fr;
+    @media (max-width:640px){
+      .grid-2,.grid-3,.grid-4{
+        grid-template-columns:1fr;
       }
     }
 
-    label {
-      display: block;
-      margin-top: 10px;
-      margin-bottom: 6px;
-      font-size: 13px;
-      font-weight: 700;
-      color: #334155;
+    label{
+      display:block;
+      margin-top:10px;
+      margin-bottom:6px;
+      font-size:13px;
+      font-weight:700;
+      color:#334155;
     }
 
-    input, select, textarea {
-      width: 100%;
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 12px 13px;
-      font-size: 15px;
-      outline: none;
-      background: #fff;
-      color: var(--text);
+    input,select,textarea{
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px 13px;
+      font-size:15px;
+      outline:none;
+      background:#fff;
+      color:var(--text);
     }
 
-    input:focus, select:focus, textarea:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.12);
+    input:focus,select:focus,textarea:focus{
+      border-color:var(--primary);
+      box-shadow:0 0 0 4px rgba(14,165,233,.12);
     }
 
-    textarea {
-      resize: vertical;
-      min-height: 90px;
+    .btn-row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:12px;
     }
 
-    .btn-row {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 12px;
+    .btn{
+      border:none;
+      border-radius:14px;
+      padding:13px 16px;
+      font-size:15px;
+      font-weight:800;
+      cursor:pointer;
+      transition:transform .08s ease, opacity .15s ease;
     }
 
-    .btn {
-      border: none;
-      border-radius: 14px;
-      padding: 13px 16px;
-      font-size: 15px;
-      font-weight: 800;
-      cursor: pointer;
-      transition: transform .08s ease, opacity .15s ease;
+    .btn:active{ transform:scale(.985); }
+
+    .btn-primary{
+      background:linear-gradient(180deg,#22c1ff,#0ea5e9);
+      color:#fff;
+      flex:1;
     }
 
-    .btn:active {
-      transform: scale(0.985);
+    .btn-dark{
+      background:#111827;
+      color:#fff;
+      flex:1;
     }
 
-    .btn-primary {
-      background: linear-gradient(180deg, #22c1ff, #0ea5e9);
-      color: #fff;
-      flex: 1;
+    .btn-success{
+      background:linear-gradient(180deg,#22c55e,#16a34a);
+      color:#fff;
+      flex:1;
     }
 
-    .btn-dark {
-      background: #111827;
-      color: #fff;
-      flex: 1;
+    .btn-warning{
+      background:linear-gradient(180deg,#fbbf24,#f59e0b);
+      color:#fff;
+      flex:1;
     }
 
-    .btn-success {
-      background: linear-gradient(180deg, #22c55e, #16a34a);
-      color: #fff;
-      flex: 1;
+    .btn-outline{
+      background:#fff;
+      color:var(--primary-dark);
+      border:1px solid #bae6fd;
+      flex:1;
     }
 
-    .btn-warning {
-      background: linear-gradient(180deg, #fbbf24, #f59e0b);
-      color: #fff;
-      flex: 1;
+    .btn[disabled]{
+      opacity:.45;
+      cursor:not-allowed;
     }
 
-    .btn-danger {
-      background: linear-gradient(180deg, #ef4444, #dc2626);
-      color: #fff;
-      flex: 1;
+    .login-card{
+      text-align:center;
+      padding-top:22px;
+      padding-bottom:22px;
     }
 
-    .btn-outline {
-      background: #fff;
-      color: var(--primary-dark);
-      border: 1px solid #bae6fd;
-      flex: 1;
+    .login-card h2{
+      margin:0 0 6px;
+      font-size:24px;
     }
 
-    .btn[disabled] {
-      opacity: 0.45;
-      cursor: not-allowed;
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:800;
+      white-space:nowrap;
     }
 
-    .login-card {
-      text-align: center;
-      padding-top: 22px;
-      padding-bottom: 22px;
+    .status-aberta{
+      background:rgba(245,158,11,.14);
+      color:#a16207;
     }
 
-    .login-card h2 {
-      margin: 0 0 6px;
-      font-size: 24px;
+    .status-concluida{
+      background:rgba(37,99,235,.12);
+      color:#1d4ed8;
     }
 
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 800;
-      white-space: nowrap;
+    .status-aprovada{
+      background:rgba(22,163,74,.14);
+      color:#166534;
     }
 
-    .status-aberta {
-      background: rgba(245, 158, 11, 0.14);
-      color: #a16207;
+    .kpi{
+      background:linear-gradient(180deg,#ffffff,#f8fbff);
+      border:1px solid #e0f2fe;
+      border-radius:18px;
+      padding:14px;
+      box-shadow:0 8px 18px rgba(2,132,199,.07);
     }
 
-    .status-concluida {
-      background: rgba(37, 99, 235, 0.12);
-      color: #1d4ed8;
+    .kpi .label{
+      color:var(--muted);
+      font-size:12px;
+      font-weight:700;
+      text-transform:uppercase;
+      letter-spacing:.5px;
     }
 
-    .status-aprovada {
-      background: rgba(22, 163, 74, 0.14);
-      color: #166534;
+    .kpi .value{
+      margin-top:6px;
+      font-size:22px;
+      font-weight:800;
+      color:#0f172a;
     }
 
-    .status-divergencia {
-      background: rgba(220, 38, 38, 0.12);
-      color: #991b1b;
+    .trip-card{
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:10px;
+      align-items:center;
+      cursor:pointer;
     }
 
-    .kpi {
-      background: linear-gradient(180deg, #ffffff, #f8fbff);
-      border: 1px solid #e0f2fe;
-      border-radius: 18px;
-      padding: 14px;
-      box-shadow: 0 8px 18px rgba(2, 132, 199, 0.07);
+    .trip-main{ min-width:0; }
+
+    .trip-title{
+      font-size:17px;
+      font-weight:800;
+      margin:0 0 4px;
     }
 
-    .kpi .label {
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+    .trip-meta{
+      font-size:13px;
+      color:var(--muted);
+      line-height:1.45;
     }
 
-    .kpi .value {
-      margin-top: 6px;
-      font-size: 22px;
-      font-weight: 800;
-      color: #0f172a;
+    .trip-money{
+      text-align:right;
+      min-width:130px;
     }
 
-    .trip-card {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 10px;
-      align-items: center;
-      cursor: pointer;
+    .money-label{
+      font-size:11px;
+      color:var(--muted);
+      font-weight:700;
+      text-transform:uppercase;
     }
 
-    .trip-main {
-      min-width: 0;
+    .money-value{
+      font-weight:900;
+      font-size:18px;
+      margin-top:4px;
     }
 
-    .trip-title {
-      font-size: 17px;
-      font-weight: 800;
-      margin: 0 0 4px;
+    .positive{ color:var(--success); }
+    .negative{ color:var(--danger); }
+
+    .divider{
+      height:1px;
+      background:var(--line);
+      margin:14px 0;
     }
 
-    .trip-meta {
-      font-size: 13px;
-      color: var(--muted);
-      line-height: 1.45;
+    .alert-box{
+      border-radius:16px;
+      padding:13px 14px;
+      margin-top:12px;
+      font-size:14px;
+      font-weight:700;
     }
 
-    .trip-money {
-      text-align: right;
-      min-width: 130px;
+    .alert-info{
+      background:rgba(37,99,235,.10);
+      color:#1d4ed8;
+      border:1px solid rgba(37,99,235,.16);
     }
 
-    .money-label {
-      font-size: 11px;
-      color: var(--muted);
-      font-weight: 700;
-      text-transform: uppercase;
+    .alert-warning{
+      background:rgba(245,158,11,.12);
+      color:#92400e;
+      border:1px solid rgba(245,158,11,.16);
     }
 
-    .money-value {
-      font-weight: 900;
-      font-size: 18px;
-      margin-top: 4px;
+    .alert-danger{
+      background:rgba(220,38,38,.09);
+      color:#991b1b;
+      border:1px solid rgba(220,38,38,.14);
     }
 
-    .positive { color: var(--success); }
-    .negative { color: var(--danger); }
-
-    .divider {
-      height: 1px;
-      background: var(--line);
-      margin: 14px 0;
+    .expense-item{
+      display:grid;
+      grid-template-columns:auto 1fr auto;
+      gap:12px;
+      align-items:center;
+      padding:14px;
+      border-radius:16px;
+      background:#fff;
+      border:1px solid #eef2f7;
+      box-shadow:0 8px 16px rgba(15,23,42,.04);
+      margin-top:10px;
     }
 
-    .alert-box {
-      border-radius: 16px;
-      padding: 13px 14px;
-      margin-top: 12px;
-      font-size: 14px;
-      font-weight: 700;
+    .expense-icon{
+      width:40px;
+      height:40px;
+      border-radius:12px;
+      display:grid;
+      place-items:center;
+      background:#e0f2fe;
+      color:var(--primary-dark);
+      font-size:18px;
     }
 
-    .alert-info {
-      background: rgba(37, 99, 235, 0.10);
-      color: #1d4ed8;
-      border: 1px solid rgba(37, 99, 235, 0.16);
+    .expense-name{
+      font-weight:800;
+      font-size:15px;
+      margin-bottom:4px;
     }
 
-    .alert-warning {
-      background: rgba(245, 158, 11, 0.12);
-      color: #92400e;
-      border: 1px solid rgba(245, 158, 11, 0.16);
+    .expense-meta{
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.4;
     }
 
-    .alert-danger {
-      background: rgba(220, 38, 38, 0.09);
-      color: #991b1b;
-      border: 1px solid rgba(220, 38, 38, 0.14);
+    .expense-value{
+      text-align:right;
+      font-weight:900;
+      font-size:18px;
     }
 
-    .expense-item {
-      display: grid;
-      grid-template-columns: auto 1fr auto;
-      gap: 12px;
-      align-items: center;
-      padding: 14px;
-      border-radius: 16px;
-      background: #fff;
-      border: 1px solid #eef2f7;
-      box-shadow: 0 8px 16px rgba(15,23,42,0.04);
-      margin-top: 10px;
+    .expense-actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:8px;
     }
 
-    .expense-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
-      display: grid;
-      place-items: center;
-      background: #e0f2fe;
-      color: var(--primary-dark);
-      font-size: 18px;
+    .mini-btn{
+      border:none;
+      border-radius:10px;
+      padding:8px 10px;
+      font-size:12px;
+      font-weight:800;
+      cursor:pointer;
     }
 
-    .expense-name {
-      font-weight: 800;
-      font-size: 15px;
-      margin-bottom: 4px;
+    .mini-warning{
+      background:rgba(245,158,11,.14);
+      color:#92400e;
     }
 
-    .expense-meta {
-      font-size: 12px;
-      color: var(--muted);
-      line-height: 1.4;
+    .detail-head{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:flex-start;
+      flex-wrap:wrap;
     }
 
-    .expense-value {
-      text-align: right;
-      font-weight: 900;
-      font-size: 18px;
+    .summary-list{
+      display:grid;
+      gap:8px;
+      margin-top:8px;
     }
 
-    .expense-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 8px;
+    .summary-row{
+      display:flex;
+      justify-content:space-between;
+      gap:8px;
+      font-size:14px;
     }
 
-    .mini-btn {
-      border: none;
-      border-radius: 10px;
-      padding: 8px 10px;
-      font-size: 12px;
-      font-weight: 800;
-      cursor: pointer;
+    .summary-row strong{
+      font-size:16px;
     }
 
-    .mini-warning {
-      background: rgba(245, 158, 11, 0.14);
-      color: #92400e;
+    .toolbar{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:10px;
     }
 
-    .mini-danger {
-      background: rgba(220, 38, 38, 0.10);
-      color: #991b1b;
+    .toolbar .btn{ flex:1; }
+
+    .empty{
+      text-align:center;
+      color:var(--muted);
+      padding:22px 10px;
+      font-size:14px;
     }
 
-    .detail-head {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      align-items: flex-start;
-      flex-wrap: wrap;
+    .top-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom:12px;
     }
 
-    .summary-list {
-      display: grid;
-      gap: 8px;
-      margin-top: 8px;
+    .inline-note{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:6px;
     }
 
-    .summary-row {
-      display: flex;
-      justify-content: space-between;
-      gap: 8px;
-      font-size: 14px;
+    .back-btn{ margin-top:0; }
+
+    .preview-box{
+      margin-top:12px;
+      padding:12px;
+      border:1px dashed #cbd5e1;
+      border-radius:14px;
+      background:#f8fafc;
+      text-align:center;
     }
 
-    .summary-row strong {
-      font-size: 16px;
+    .preview-box img{
+      width:100%;
+      max-width:180px;
+      max-height:180px;
+      object-fit:cover;
+      border-radius:12px;
+      border:1px solid #e2e8f0;
     }
 
-    .toolbar {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 10px;
+    .preview-empty{
+      font-size:13px;
+      color:#64748b;
     }
 
-    .toolbar .btn {
-      flex: 1;
-    }
-
-    .empty {
-      text-align: center;
-      color: var(--muted);
-      padding: 22px 10px;
-      font-size: 14px;
-    }
-
-    .top-actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 12px;
-    }
-
-    .inline-note {
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 6px;
-    }
-
-    .back-btn {
-      margin-top: 0;
+    a.cupom-link{
+      color:#0369a1;
+      text-decoration:none;
+      font-weight:700;
+      font-size:12px;
     }
   </style>
 </head>
@@ -475,10 +477,8 @@
   <div class="app-shell">
     <div class="topbar">
       <h1>🚛 Gestão de Transportes</h1>
-      <p>Operação, conferência, divergências e aprovação financeira</p>
+      <p>Operação, conferência financeira, divergências e aprovação</p>
     </div>
-
-    <div id="toastArea"></div>
 
     <section id="loginScreen" class="screen active">
       <div class="card login-card">
@@ -572,6 +572,7 @@
 
       <div class="card">
         <h3 class="section-title">Painel do Gestor</h3>
+
         <div class="grid-4">
           <div class="kpi">
             <div class="label">Total</div>
@@ -651,6 +652,16 @@
           </div>
         </div>
 
+        <div class="toolbar">
+          <button type="button" class="btn btn-outline" onclick="window.abrirCameraCupom()">
+            <i class="fa-solid fa-camera"></i> Tirar foto do cupom
+          </button>
+        </div>
+
+        <div id="previewCupom" class="preview-box">
+          <div class="preview-empty">Nenhuma foto vinculada à próxima despesa.</div>
+        </div>
+
         <div class="inline-note" id="notaLancamento"></div>
 
         <div class="toolbar">
@@ -696,11 +707,16 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
+    const CLOUD_NAME = "domf2kvw6";
+    const UPLOAD_PRESET = "registro_prazo";
+
     const state = {
       perfil: null,
       viagemId: null,
       viagem: null,
-      despesas: []
+      despesas: [],
+      fotoCupomUrl: "",
+      fotoCupomThumb: ""
     };
 
     const TIPOS_OPERADOR = [
@@ -755,7 +771,7 @@
       btnFinalizarViagem: document.getElementById("btnFinalizarViagem"),
       btnAprovarViagem: document.getElementById("btnAprovarViagem"),
       notaLancamento: document.getElementById("notaLancamento"),
-      boxLancamento: document.getElementById("boxLancamento"),
+      previewCupom: document.getElementById("previewCupom"),
 
       tituloViagem: document.getElementById("tituloViagem"),
       subtituloViagem: document.getElementById("subtituloViagem"),
@@ -773,7 +789,29 @@
       alertaFinanceiroPainel: document.getElementById("alertaFinanceiroPainel")
     };
 
-    function showToast(msg, type = "info") {
+    const widgetCupom = window.cloudinary.createUploadWidget(
+      {
+        cloudName: CLOUD_NAME,
+        uploadPreset: UPLOAD_PRESET,
+        multiple: false,
+        showCompletedButton: true
+      },
+      (err, result) => {
+        if (err) {
+          console.error("Erro no upload:", err);
+          alert("Erro ao enviar foto: " + err.message);
+          return;
+        }
+
+        if (result && result.event === "success") {
+          state.fotoCupomUrl = result.info.secure_url || "";
+          state.fotoCupomThumb = result.info.thumbnail_url || result.info.secure_url || "";
+          renderPreviewCupom();
+        }
+      }
+    );
+
+    function showToast(msg) {
       alert(msg);
     }
 
@@ -827,6 +865,24 @@
       el.frete.value = "";
     }
 
+    function limparCupomAtual() {
+      state.fotoCupomUrl = "";
+      state.fotoCupomThumb = "";
+      renderPreviewCupom();
+    }
+
+    function renderPreviewCupom() {
+      if (!state.fotoCupomUrl) {
+        el.previewCupom.innerHTML = `<div class="preview-empty">Nenhuma foto vinculada à próxima despesa.</div>`;
+        return;
+      }
+
+      el.previewCupom.innerHTML = `
+        <img src="${state.fotoCupomThumb}" alt="Cupom">
+        <div class="inline-note">Foto vinculada à próxima despesa</div>
+      `;
+    }
+
     function carregarTiposDespesa() {
       const opcoes = [...TIPOS_OPERADOR];
       if (state.perfil === "gestor") {
@@ -860,10 +916,6 @@
       return despesas.filter((d) => d.corrigido === true).length;
     }
 
-    function hasPendenciaNaoCorrigida(despesas) {
-      return despesas.some((d) => d.divergenciaPendente === true);
-    }
-
     async function abrirDetalheViagem(viagemId) {
       state.viagemId = viagemId;
 
@@ -871,7 +923,7 @@
       const viagemSnap = await getDoc(viagemRef);
 
       if (!viagemSnap.exists()) {
-        showToast("Viagem não encontrada.", "error");
+        showToast("Viagem não encontrada.");
         return;
       }
 
@@ -879,6 +931,7 @@
       state.despesas = await buscarDespesas(viagemId);
 
       carregarTiposDespesa();
+      limparCupomAtual();
       renderDetalhe();
       mostrarTela("detailScreen");
     }
@@ -953,7 +1006,7 @@
         el.alertaFinanceiroPainel.innerHTML = `
           <div class="alert-box alert-warning">
             <i class="fa-solid fa-triangle-exclamation"></i>
-            Foram registradas ${divergenciasTotais} divergência(s) financeira(s) corrigida(s) nas viagens.
+            Foram registradas ${divergenciasTotais} divergência(s) corrigida(s) nas viagens.
           </div>
         `;
       } else {
@@ -974,7 +1027,6 @@
       const totalDespesa = calcularTotaisDespesas(despesas);
       const lucro = Number(viagem.frete || 0) - totalDespesa;
       const divergencias = contarDivergencias(despesas);
-      const pendencia = hasPendenciaNaoCorrigida(despesas);
 
       el.tituloViagem.textContent = `${viagem.motorista || "-"} · ${viagem.origem || "-"} → ${viagem.destino || "-"}`;
       el.subtituloViagem.innerHTML = `
@@ -992,18 +1044,11 @@
       `;
 
       let alertas = "";
-      if (pendencia) {
-        alertas += `
-          <div class="alert-box alert-danger">
-            <i class="fa-solid fa-circle-exclamation"></i>
-            Existem divergências pendentes. Não é possível aprovar enquanto houver inconsistências não corrigidas.
-          </div>
-        `;
-      } else if (divergencias > 0) {
+      if (divergencias > 0) {
         alertas += `
           <div class="alert-box alert-warning">
             <i class="fa-solid fa-scale-balanced"></i>
-            Esta viagem possui ${divergencias} divergência(s) corrigida(s) pelo gestor.
+            Esta viagem possui ${divergencias} divergência(s) financeira(s) corrigida(s) pelo gestor.
           </div>
         `;
       } else {
@@ -1026,18 +1071,17 @@
 
       el.alertasViagem.innerHTML = alertas;
 
-      const bloqueada = viagem.status === "concluida" || viagem.status === "aprovada";
-      if (state.perfil === "gestor" || bloqueada) {
-        el.notaLancamento.textContent = bloqueada
-          ? "Lançamentos bloqueados porque a viagem já foi finalizada ou aprovada."
-          : "Gestor pode lançar despesas normais e extras.";
-      } else {
-        el.notaLancamento.textContent = "Operador pode lançar despesas até finalizar a viagem.";
-      }
+      const operadorPodeLancar = state.perfil === "operador" && viagem.status === "aberta";
+      const gestorPodeLancar = state.perfil === "gestor" && viagem.status !== "aprovada";
+      const podeLancar = operadorPodeLancar || gestorPodeLancar;
 
-      el.btnAdicionarDespesa.disabled = bloqueada;
-      el.tipoDespesa.disabled = bloqueada;
-      el.valorDespesa.disabled = bloqueada;
+      el.notaLancamento.textContent = state.perfil === "gestor"
+        ? "Gestor pode lançar despesas normais e extras enquanto a viagem não estiver aprovada."
+        : "Operador pode lançar despesas apenas enquanto a viagem estiver em andamento.";
+
+      el.btnAdicionarDespesa.disabled = !podeLancar;
+      el.tipoDespesa.disabled = !podeLancar;
+      el.valorDespesa.disabled = !podeLancar;
 
       if (state.perfil === "operador" && viagem.status === "aberta") {
         el.btnFinalizarViagem.classList.remove("hidden");
@@ -1046,11 +1090,7 @@
         el.btnFinalizarViagem.classList.add("hidden");
       }
 
-      if (
-        state.perfil === "gestor" &&
-        viagem.status === "concluida" &&
-        !pendencia
-      ) {
+      if (state.perfil === "gestor" && viagem.status === "concluida") {
         el.btnAprovarViagem.classList.remove("hidden");
       } else {
         el.btnAprovarViagem.classList.add("hidden");
@@ -1061,7 +1101,7 @@
         return;
       }
 
-      el.listaDespesas.innerHTML = despesas.map((d, index) => {
+      el.listaDespesas.innerHTML = despesas.map((d) => {
         const valorAtual = Number(d.valor || 0);
         const valorOriginal = Number(d.valorOriginal ?? d.valor ?? 0);
         const foiCorrigida = d.corrigido === true;
@@ -1082,6 +1122,7 @@
                   : `Valor lançado: ${formatCurrency(valorAtual)}`
                 }
                 ${motivo ? `<br>Motivo: ${motivo}` : ""}
+                ${d.fotoUrl ? `<br><a class="cupom-link" href="${d.fotoUrl}" target="_blank"><i class="fa-solid fa-image"></i> Ver cupom</a>` : ""}
               </div>
 
               ${
@@ -1123,7 +1164,7 @@
     window.abrirGestor = function () {
       const senha = prompt("Digite a senha do gestor:");
       if (senha !== "1234") {
-        showToast("Senha incorreta.", "error");
+        showToast("Senha incorreta.");
         return;
       }
 
@@ -1137,6 +1178,7 @@
       state.viagemId = null;
       state.viagem = null;
       state.despesas = [];
+      limparCupomAtual();
       mostrarTela("loginScreen");
     };
 
@@ -1155,19 +1197,19 @@
       };
 
       if (!payload.motorista || !payload.origem || !payload.destino) {
-        showToast("Preencha motorista, origem e destino.", "warning");
+        showToast("Preencha motorista, origem e destino.");
         return;
       }
 
       if (payload.frete <= 0) {
-        showToast("Informe um frete válido.", "warning");
+        showToast("Informe um frete válido.");
         return;
       }
 
       await addDoc(collection(db, "viagens"), payload);
 
       limparFormularioViagem();
-      showToast("Viagem criada com sucesso.", "info");
+      showToast("Viagem criada com sucesso.");
       carregarPainelOperador();
     };
 
@@ -1175,23 +1217,37 @@
       await abrirDetalheViagem(viagemId);
     };
 
+    window.abrirCameraCupom = function () {
+      if (!state.viagemId) {
+        showToast("Abra uma viagem antes de enviar o cupom.");
+        return;
+      }
+
+      widgetCupom.update({ folder: "transportes" });
+      widgetCupom.open();
+    };
+
     window.adicionarDespesa = async function () {
       if (!state.viagem || !state.viagemId) return;
 
-      if (state.viagem.status !== "aberta") {
-        showToast("Não é possível adicionar despesas após finalizar ou aprovar a viagem.", "warning");
+      const operadorPodeLancar = state.perfil === "operador" && state.viagem.status === "aberta";
+      const gestorPodeLancar = state.perfil === "gestor" && state.viagem.status !== "aprovada";
+      const podeLancar = operadorPodeLancar || gestorPodeLancar;
+
+      if (!podeLancar) {
+        showToast("Não é possível adicionar despesas nesse status.");
         return;
       }
 
       const valor = Number(el.valorDespesa.value || 0);
       if (valor <= 0) {
-        showToast("Não é permitido adicionar despesa com valor 0.", "warning");
+        showToast("Não é permitido adicionar despesa com valor 0.");
         return;
       }
 
       const tipo = el.tipoDespesa.value;
       if (!tipo) {
-        showToast("Selecione o tipo da despesa.", "warning");
+        showToast("Selecione o tipo da despesa.");
         return;
       }
 
@@ -1200,12 +1256,14 @@
         valor,
         valorOriginal: valor,
         corrigido: false,
-        divergenciaPendente: false,
         motivoCorrecao: "",
+        fotoUrl: state.fotoCupomUrl || "",
         criadoEm: Date.now()
       });
 
       el.valorDespesa.value = "";
+      limparCupomAtual();
+
       await atualizarViagemNoEstado();
       renderDetalhe();
     };
@@ -1214,12 +1272,12 @@
       if (!state.viagem || !state.viagemId) return;
 
       if (state.perfil !== "operador") {
-        showToast("Somente o operador pode finalizar a viagem.", "warning");
+        showToast("Somente o operador pode finalizar a viagem.");
         return;
       }
 
       if (state.viagem.status !== "aberta") {
-        showToast("Essa viagem já foi finalizada anteriormente.", "warning");
+        showToast("Essa viagem já foi finalizada anteriormente.");
         return;
       }
 
@@ -1229,12 +1287,12 @@
 
       await atualizarViagemNoEstado();
       renderDetalhe();
-      showToast("Viagem finalizada. Agora ela aguarda aprovação do gestor.", "info");
+      showToast("Viagem finalizada. Agora ela aguarda aprovação do gestor.");
     };
 
     window.corrigirDespesa = async function (despesaId) {
       if (state.perfil !== "gestor") {
-        showToast("Somente o gestor pode corrigir valores.", "warning");
+        showToast("Somente o gestor pode corrigir valores.");
         return;
       }
 
@@ -1252,7 +1310,7 @@
 
       const novoValor = Number(String(novoValorTexto).replace(",", "."));
       if (!Number.isFinite(novoValor) || novoValor <= 0) {
-        showToast("Valor corrigido inválido.", "warning");
+        showToast("Valor corrigido inválido.");
         return;
       }
 
@@ -1263,30 +1321,24 @@
         valor: novoValor,
         valorOriginal: Number(despesa.valorOriginal ?? despesa.valor ?? 0),
         corrigido: true,
-        divergenciaPendente: false,
         motivoCorrecao: motivo.trim()
       });
 
       await atualizarViagemNoEstado();
       renderDetalhe();
-      showToast("Despesa corrigida com sucesso.", "info");
+      showToast("Despesa corrigida com sucesso.");
     };
 
     window.aprovarViagem = async function () {
       if (state.perfil !== "gestor") {
-        showToast("Somente o gestor pode aprovar viagens.", "warning");
+        showToast("Somente o gestor pode aprovar viagens.");
         return;
       }
 
       if (!state.viagem || !state.viagemId) return;
 
       if (state.viagem.status !== "concluida") {
-        showToast("Somente viagens concluídas podem ser aprovadas.", "warning");
-        return;
-      }
-
-      if (hasPendenciaNaoCorrigida(state.despesas)) {
-        showToast("Há divergências pendentes. Corrija antes de aprovar.", "warning");
+        showToast("Somente viagens concluídas podem ser aprovadas.");
         return;
       }
 
@@ -1296,10 +1348,12 @@
 
       await atualizarViagemNoEstado();
       renderDetalhe();
-      showToast("Viagem aprovada com sucesso.", "info");
+      showToast("Viagem aprovada com sucesso.");
     };
 
     window.voltarDaViagem = async function () {
+      limparCupomAtual();
+
       if (state.perfil === "gestor") {
         mostrarTela("managerScreen");
         await carregarPainelGestor();
@@ -1310,6 +1364,7 @@
     };
 
     mostrarTela("loginScreen");
+    renderPreviewCupom();
   </script>
 </body>
 </html>
