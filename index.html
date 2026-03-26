@@ -1,326 +1,1090 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Transportes PRO</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestão de Transportes - Financeiro</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    :root{
+      --bg1:#0ea5e9;
+      --bg2:#0284c7;
+      --ink:#0f172a;
+      --muted:#64748b;
+      --line:#e2e8f0;
+      --card:#ffffff;
+      --shadow:0 14px 35px rgba(15, 23, 42, .12);
 
-<style>
+      --warn:#f59e0b;
+      --info:#3b82f6;
+      --ok:#16a34a;
+      --danger:#dc2626;
+      --soft:#f8fafc;
+    }
 
-/* FUNDO */
-body {
-  margin:0;
-  font-family:'Segoe UI', sans-serif;
-  background: linear-gradient(135deg,#0ea5e9,#0284c7);
-  display:flex;
-  justify-content:center;
-}
+    * { box-sizing:border-box; }
 
-/* APP */
-.app {
-  width:100%;
-  max-width:520px;
-}
+    body{
+      margin:0;
+      font-family:Inter, "Segoe UI", Arial, sans-serif;
+      color:var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(255,255,255,.18), transparent 32%),
+        linear-gradient(135deg, var(--bg1), var(--bg2));
+      min-height:100vh;
+    }
 
-/* HEADER */
-.header {
-  color:#fff;
-  padding:20px;
-  text-align:center;
-  font-size:22px;
-  font-weight:600;
-}
+    .shell{
+      max-width:1180px;
+      margin:0 auto;
+      padding:22px 16px 36px;
+    }
 
-/* CONTAINER */
-.container { padding:15px; }
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      color:#fff;
+      margin-bottom:18px;
+    }
 
-/* CARD */
-.card {
-  background:#fff;
-  border-radius:16px;
-  padding:16px;
-  margin-top:12px;
-  box-shadow:0 12px 25px rgba(0,0,0,0.12);
-}
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      font-weight:800;
+      letter-spacing:.2px;
+      font-size:1.1rem;
+    }
 
-/* BOTÕES */
-button {
-  width:100%;
-  padding:14px;
-  margin-top:10px;
-  border:none;
-  border-radius:12px;
-  background:#0ea5e9;
-  color:#fff;
-  font-weight:600;
-  font-size:15px;
-}
+    .brand-badge{
+      width:42px;
+      height:42px;
+      border-radius:14px;
+      display:grid;
+      place-items:center;
+      background:rgba(255,255,255,.18);
+      backdrop-filter:blur(10px);
+      box-shadow:0 8px 20px rgba(0,0,0,.12);
+      font-size:1.05rem;
+    }
 
-/* INPUT */
-input, select {
-  width:100%;
-  padding:12px;
-  margin-top:10px;
-  border-radius:12px;
-  border:1px solid #e5e7eb;
-}
+    .profile-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,.16);
+      color:#fff;
+      backdrop-filter:blur(10px);
+      font-size:.92rem;
+      font-weight:600;
+    }
 
-/* STATUS */
-.status {
-  padding:5px 10px;
-  border-radius:10px;
-  font-size:12px;
-}
+    .screen{ display:none; }
+    .screen.active{ display:block; }
 
-.aberta { background:#f59e0b; color:#fff;}
-.concluida { background:#3b82f6; color:#fff;}
-.aprovada { background:#16a34a; color:#fff;}
+    .panel{
+      background:var(--card);
+      border-radius:22px;
+      box-shadow:var(--shadow);
+      border:1px solid rgba(255,255,255,.35);
+      padding:18px;
+    }
 
-.hidden { display:none; }
+    .hero{
+      display:grid;
+      grid-template-columns:1.2fr .8fr;
+      gap:18px;
+      align-items:stretch;
+    }
 
-/* DESPESAS */
-.despesa {
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:10px;
-}
+    .hero-copy{
+      color:#fff;
+      padding:14px 4px 4px;
+    }
 
-.despesa i {
-  font-size:18px;
-  width:25px;
-  text-align:center;
-}
+    .hero-copy h1{
+      margin:0 0 8px;
+      font-size:clamp(1.6rem, 4vw, 2.5rem);
+      line-height:1.02;
+    }
 
-</style>
+    .hero-copy p{
+      margin:0;
+      opacity:.92;
+      max-width:620px;
+      line-height:1.55;
+    }
 
+    .role-grid{
+      display:grid;
+      gap:14px;
+    }
+
+    .role-card{
+      border:none;
+      border-radius:22px;
+      padding:20px;
+      text-align:left;
+      cursor:pointer;
+      background:rgba(255,255,255,.95);
+      box-shadow:var(--shadow);
+      transition:transform .18s ease, box-shadow .18s ease;
+    }
+
+    .role-card:hover{ transform:translateY(-2px); }
+    .role-card .role-icon{
+      width:48px;
+      height:48px;
+      border-radius:16px;
+      display:grid;
+      place-items:center;
+      margin-bottom:14px;
+      color:#fff;
+      font-size:1.05rem;
+    }
+    .role-card.operator .role-icon{ background:linear-gradient(135deg,#0ea5e9,#2563eb); }
+    .role-card.manager .role-icon{ background:linear-gradient(135deg,#111827,#334155); }
+    .role-card h3{ margin:0 0 6px; font-size:1.05rem; }
+    .role-card p{ margin:0; color:var(--muted); line-height:1.45; }
+
+    .page-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:14px;
+      color:#fff;
+    }
+
+    .page-head h2{
+      margin:0;
+      font-size:1.35rem;
+    }
+
+    .page-sub{
+      margin-top:4px;
+      font-size:.92rem;
+      opacity:.92;
+    }
+
+    .actions-inline{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .btn{
+      border:none;
+      border-radius:14px;
+      padding:12px 16px;
+      font-weight:700;
+      cursor:pointer;
+      transition:transform .15s ease, opacity .15s ease;
+      font-size:.95rem;
+    }
+    .btn:hover{ transform:translateY(-1px); }
+    .btn:disabled{
+      cursor:not-allowed;
+      opacity:.55;
+      transform:none;
+    }
+
+    .btn-primary{
+      color:#fff;
+      background:linear-gradient(135deg,#0ea5e9,#2563eb);
+    }
+    .btn-dark{
+      color:#fff;
+      background:linear-gradient(135deg,#0f172a,#334155);
+    }
+    .btn-soft{
+      color:var(--ink);
+      background:#eef6ff;
+      border:1px solid #dbeafe;
+    }
+    .btn-danger{
+      color:#fff;
+      background:linear-gradient(135deg,#dc2626,#b91c1c);
+    }
+    .btn-warning{
+      color:#fff;
+      background:linear-gradient(135deg,#f59e0b,#d97706);
+    }
+    .btn-sm{
+      padding:9px 12px;
+      border-radius:12px;
+      font-size:.85rem;
+      font-weight:700;
+    }
+
+    .grid-2{
+      display:grid;
+      grid-template-columns:420px minmax(0,1fr);
+      gap:18px;
+      align-items:start;
+    }
+
+    .form-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:7px;
+      margin-bottom:10px;
+    }
+
+    .field label{
+      font-size:.86rem;
+      color:var(--muted);
+      font-weight:700;
+    }
+
+    input, select, textarea{
+      width:100%;
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:14px;
+      padding:12px 14px;
+      font:inherit;
+      color:var(--ink);
+      outline:none;
+      transition:border-color .15s ease, box-shadow .15s ease;
+    }
+
+    textarea{
+      min-height:90px;
+      resize:vertical;
+    }
+
+    input:focus, select:focus, textarea:focus{
+      border-color:#60a5fa;
+      box-shadow:0 0 0 4px rgba(96,165,250,.16);
+    }
+
+    .trip-grid{
+      display:grid;
+      grid-template-columns:repeat(2, minmax(0,1fr));
+      gap:14px;
+    }
+
+    .trip-card{
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:16px;
+      background:#fff;
+      box-shadow:0 8px 18px rgba(15,23,42,.06);
+      cursor:pointer;
+      transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+    }
+    .trip-card:hover{
+      transform:translateY(-2px);
+      box-shadow:0 16px 28px rgba(15,23,42,.09);
+      border-color:#cbd5e1;
+    }
+
+    .trip-top{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:flex-start;
+      margin-bottom:10px;
+    }
+
+    .trip-title{
+      font-weight:800;
+      line-height:1.25;
+      margin:0 0 4px;
+    }
+
+    .muted{ color:var(--muted); }
+
+    .status{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:7px 10px;
+      border-radius:999px;
+      font-size:.76rem;
+      font-weight:800;
+      white-space:nowrap;
+    }
+    .status.aberta{ background:#fef3c7; color:#92400e; }
+    .status.concluida{ background:#dbeafe; color:#1d4ed8; }
+    .status.aprovada{ background:#dcfce7; color:#166534; }
+
+    .mini-grid{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:10px;
+      margin-top:10px;
+    }
+
+    .mini{
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px;
+      background:var(--soft);
+    }
+
+    .mini .label{
+      font-size:.78rem;
+      color:var(--muted);
+      margin-bottom:5px;
+      font-weight:700;
+    }
+    .mini .value{
+      font-weight:800;
+    }
+
+    .kpi-grid{
+      display:grid;
+      grid-template-columns:repeat(6, minmax(0,1fr));
+      gap:14px;
+      margin-bottom:14px;
+    }
+
+    .kpi{
+      border-radius:18px;
+      padding:16px;
+      background:#fff;
+      box-shadow:var(--shadow);
+      border:1px solid rgba(255,255,255,.4);
+    }
+
+    .kpi .kpi-label{
+      color:var(--muted);
+      font-weight:700;
+      font-size:.82rem;
+      margin-bottom:8px;
+    }
+
+    .kpi .kpi-value{
+      font-size:1.4rem;
+      font-weight:900;
+      letter-spacing:-.02em;
+    }
+
+    .filters{
+      display:grid;
+      grid-template-columns:1.2fr .8fr .8fr;
+      gap:12px;
+      margin-bottom:14px;
+    }
+
+    .detail-layout{
+      display:grid;
+      grid-template-columns:minmax(0,1.2fr) 350px;
+      gap:18px;
+      align-items:start;
+    }
+
+    .section-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:12px;
+    }
+
+    .section-head h3{
+      margin:0;
+      font-size:1.02rem;
+    }
+
+    .summary-grid{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:12px;
+      margin-top:14px;
+    }
+
+    .summary-card{
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:14px;
+      background:var(--soft);
+    }
+
+    .summary-card .label{
+      color:var(--muted);
+      font-weight:700;
+      font-size:.8rem;
+      margin-bottom:7px;
+    }
+
+    .summary-card .value{
+      font-weight:900;
+      font-size:1.05rem;
+    }
+
+    .meta-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-top:12px;
+    }
+
+    .meta-item{
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px 13px;
+      background:#fff;
+    }
+
+    .meta-item .label{
+      color:var(--muted);
+      font-size:.76rem;
+      font-weight:800;
+      margin-bottom:6px;
+      text-transform:uppercase;
+      letter-spacing:.03em;
+    }
+
+    .meta-item .value{
+      font-weight:700;
+      line-height:1.35;
+    }
+
+    .alert-box{
+      border-radius:16px;
+      padding:14px;
+      margin-top:14px;
+      border:1px solid transparent;
+    }
+
+    .alert-box.error{
+      background:#fef2f2;
+      border-color:#fecaca;
+      color:#991b1b;
+    }
+
+    .alert-box.warn{
+      background:#fff7ed;
+      border-color:#fed7aa;
+      color:#9a3412;
+    }
+
+    .alert-item{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      padding:10px 0;
+      border-bottom:1px dashed rgba(100,116,139,.24);
+    }
+    .alert-item:last-child{ border-bottom:none; }
+
+    .expense-form{
+      display:grid;
+      grid-template-columns:1.1fr .7fr auto;
+      gap:10px;
+      align-items:end;
+    }
+
+    .expense-list{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    .expense-item{
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:18px;
+      padding:14px;
+      display:grid;
+      grid-template-columns:auto 1fr auto;
+      gap:12px;
+      align-items:start;
+    }
+
+    .expense-icon{
+      width:42px;
+      height:42px;
+      border-radius:14px;
+      display:grid;
+      place-items:center;
+      background:#eff6ff;
+      color:#2563eb;
+      font-size:1rem;
+      flex:none;
+    }
+
+    .expense-title{
+      margin:0 0 4px;
+      font-size:.98rem;
+      font-weight:900;
+    }
+
+    .expense-sub{
+      color:var(--muted);
+      font-size:.84rem;
+      line-height:1.4;
+    }
+
+    .expense-amount{
+      text-align:right;
+      font-weight:900;
+      font-size:1rem;
+      white-space:nowrap;
+    }
+
+    .strike{
+      text-decoration:line-through;
+      color:#94a3b8;
+      font-weight:700;
+      margin-right:7px;
+    }
+
+    .expense-tags{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:8px;
+    }
+
+    .tag{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      border-radius:999px;
+      padding:6px 10px;
+      font-size:.73rem;
+      font-weight:800;
+      background:#f1f5f9;
+      color:#334155;
+    }
+
+    .tag.info{ background:#dbeafe; color:#1d4ed8; }
+    .tag.warn{ background:#fff7ed; color:#c2410c; }
+    .tag.ok{ background:#dcfce7; color:#166534; }
+
+    .expense-actions{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+
+    .breakdown-list{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    .breakdown-item{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px 13px;
+      background:#fff;
+    }
+
+    .break-left{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
+
+    .break-left i{
+      width:28px;
+      text-align:center;
+      color:#2563eb;
+    }
+
+    .empty{
+      border:1px dashed #cbd5e1;
+      border-radius:16px;
+      padding:18px;
+      text-align:center;
+      color:var(--muted);
+      background:rgba(255,255,255,.7);
+    }
+
+    .financial-banner{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      border-radius:16px;
+      padding:14px 16px;
+      margin-top:12px;
+      font-weight:800;
+    }
+
+    .financial-banner.ok{
+      background:#dcfce7;
+      color:#166534;
+    }
+    .financial-banner.warn{
+      background:#fff7ed;
+      color:#9a3412;
+    }
+    .financial-banner.error{
+      background:#fee2e2;
+      color:#991b1b;
+    }
+
+    .modal-wrap{
+      position:fixed;
+      inset:0;
+      background:rgba(15,23,42,.45);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:16px;
+      z-index:30;
+    }
+    .modal-wrap.active{ display:flex; }
+
+    .modal{
+      width:min(520px, 100%);
+      background:#fff;
+      border-radius:24px;
+      padding:20px;
+      box-shadow:0 18px 38px rgba(0,0,0,.24);
+    }
+
+    .modal h3{
+      margin:0 0 6px;
+      font-size:1.15rem;
+    }
+    .modal p{
+      margin:0 0 14px;
+      color:var(--muted);
+      line-height:1.45;
+    }
+
+    .modal-actions{
+      display:flex;
+      justify-content:flex-end;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:14px;
+    }
+
+    .toast{
+      position:fixed;
+      right:18px;
+      bottom:18px;
+      min-width:250px;
+      max-width:420px;
+      padding:14px 16px;
+      border-radius:16px;
+      color:#fff;
+      font-weight:800;
+      box-shadow:0 16px 34px rgba(0,0,0,.2);
+      transform:translateY(18px);
+      opacity:0;
+      pointer-events:none;
+      transition:all .18s ease;
+      z-index:40;
+    }
+    .toast.show{
+      transform:translateY(0);
+      opacity:1;
+    }
+    .toast.info{ background:#2563eb; }
+    .toast.error{ background:#dc2626; }
+    .toast.success{ background:#16a34a; }
+    .toast.warn{ background:#d97706; }
+
+    @media (max-width: 980px){
+      .grid-2,
+      .detail-layout,
+      .hero{
+        grid-template-columns:1fr;
+      }
+      .kpi-grid{
+        grid-template-columns:repeat(2, minmax(0,1fr));
+      }
+      .trip-grid{
+        grid-template-columns:1fr;
+      }
+      .filters{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media (max-width: 720px){
+      .summary-grid,
+      .meta-grid,
+      .form-grid{
+        grid-template-columns:1fr;
+      }
+      .expense-form{
+        grid-template-columns:1fr;
+      }
+      .kpi-grid{
+        grid-template-columns:1fr 1fr;
+      }
+      .topbar{
+        flex-direction:column;
+        align-items:flex-start;
+      }
+      .page-head{
+        flex-direction:column;
+        align-items:flex-start;
+      }
+    }
+  </style>
 </head>
-
 <body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-badge"><i class="fa-solid fa-truck-fast"></i></div>
+        <div>
+          Gestão de Transportes
+          <div style="font-size:.86rem; font-weight:600; opacity:.9;">Controle operacional e financeiro</div>
+        </div>
+      </div>
+      <div id="profilePill" class="profile-pill" style="display:none;"></div>
+    </div>
 
-<div class="app">
-<div class="header">🚛 Transportes PRO</div>
+    <section id="roleScreen" class="screen active">
+      <div class="hero">
+        <div class="hero-copy">
+          <h1>Sistema financeiro de viagens com aprovação e divergências.</h1>
+          <p>
+            Operador abre a viagem, lança despesas e finaliza. Gestor revisa, corrige valores inconsistentes,
+            recebe alertas automáticos e só aprova quando não houver erro bloqueante.
+          </p>
+        </div>
 
-<div class="container">
+        <div class="role-grid">
+          <button id="btnEntryOperator" class="role-card operator" type="button">
+            <div class="role-icon"><i class="fa-solid fa-user-gear"></i></div>
+            <h3>Operador</h3>
+            <p>Cadastra a viagem, lança despesas e conclui o processo operacional.</p>
+          </button>
 
-<div id="login" class="card">
-<button onclick="entrarOperador()">👷 Operador</button>
-<button onclick="entrarGestor()">📊 Gestor</button>
-</div>
+          <button id="btnEntryManager" class="role-card manager" type="button">
+            <div class="role-icon"><i class="fa-solid fa-chart-line"></i></div>
+            <h3>Gestor</h3>
+            <p>Audita, ajusta divergências financeiras, acompanha alertas e aprova.</p>
+          </button>
+        </div>
+      </div>
+    </section>
 
-<div id="operador" class="hidden">
+    <section id="operatorScreen" class="screen">
+      <div class="page-head">
+        <div>
+          <h2>Painel do Operador</h2>
+          <div class="page-sub">Criar viagem, preencher despesas e finalizar.</div>
+        </div>
+        <div class="actions-inline">
+          <button id="btnRefreshOperator" class="btn btn-soft btn-sm" type="button">Atualizar</button>
+          <button id="btnLogoutOperator" class="btn btn-dark btn-sm" type="button">Sair</button>
+        </div>
+      </div>
 
-<div class="card">
-<h3>Nova Viagem</h3>
+      <div class="grid-2">
+        <div class="panel">
+          <div class="section-head">
+            <h3>Nova viagem</h3>
+          </div>
 
-<input id="motorista" placeholder="Motorista">
-<input id="origem" placeholder="Cidade Origem">
-<input id="destino" placeholder="Cidade Destino">
+          <div class="form-grid">
+            <div class="field">
+              <label>Motorista</label>
+              <input id="tripDriver" type="text" placeholder="Ex.: João da Silva">
+            </div>
 
-<input id="localCarga" placeholder="Local Carregamento">
-<input type="datetime-local" id="dataCarga">
+            <div class="field">
+              <label>Caminhão</label>
+              <input id="tripTruck" type="text" placeholder="Ex.: MB 1620 / Placa ABC1D23">
+            </div>
 
-<input id="localDescarga" placeholder="Local Descarregamento">
-<input type="datetime-local" id="dataDescarga">
+            <div class="field">
+              <label>Cidade de origem</label>
+              <input id="tripOriginCity" type="text" placeholder="Ex.: Ampére/PR">
+            </div>
 
-<input id="frete" placeholder="Frete">
+            <div class="field">
+              <label>Cidade de destino</label>
+              <input id="tripDestCity" type="text" placeholder="Ex.: Cascavel/PR">
+            </div>
 
-<button onclick="criarViagem()">Criar Viagem</button>
-</div>
+            <div class="field">
+              <label>Local de carregamento</label>
+              <input id="tripLoadLocation" type="text" placeholder="Ex.: CD Grilazer">
+            </div>
 
-<div id="listaOperador"></div>
+            <div class="field">
+              <label>Data e hora do carregamento</label>
+              <input id="tripLoadDateTime" type="datetime-local">
+            </div>
 
-</div>
+            <div class="field">
+              <label>Local de descarregamento</label>
+              <input id="tripUnloadLocation" type="text" placeholder="Ex.: Cliente / CD">
+            </div>
 
-<div id="gestor" class="hidden">
-<div id="dashboard"></div>
-</div>
+            <div class="field">
+              <label>Data e hora do descarregamento</label>
+              <input id="tripUnloadDateTime" type="datetime-local">
+            </div>
 
-<div id="detalhe" class="hidden">
+            <div class="field" style="grid-column:1 / -1;">
+              <label>Frete</label>
+              <input id="tripFreight" type="number" step="0.01" min="0" placeholder="Ex.: 8500,00">
+            </div>
+          </div>
 
-<button onclick="voltar()">⬅ Voltar</button>
+          <button id="btnCreateTrip" class="btn btn-primary" type="button">Criar viagem</button>
+        </div>
 
-<div class="card">
-<h3 id="titulo"></h3>
-<div id="resumo"></div>
-</div>
+        <div class="panel">
+          <div class="section-head">
+            <h3>Viagens lançadas</h3>
+            <span class="muted" id="operatorTripCount">0 viagem(ns)</span>
+          </div>
+          <div id="operatorTripList" class="trip-grid"></div>
+        </div>
+      </div>
+    </section>
 
-<div class="card">
-<select id="tipo"></select>
-<input id="valor" placeholder="Valor">
-<button onclick="addDespesa()">Adicionar</button>
-<button id="btnFinalizar" onclick="finalizar()">Finalizar</button>
-<div id="btnAprovar"></div>
-</div>
+    <section id="managerScreen" class="screen">
+      <div class="page-head">
+        <div>
+          <h2>Painel do Gestor</h2>
+          <div class="page-sub">Acompanhamento financeiro, divergências, alertas e aprovação.</div>
+        </div>
+        <div class="actions-inline">
+          <button id="btnRefreshManager" class="btn btn-soft btn-sm" type="button">Atualizar</button>
+          <button id="btnLogoutManager" class="btn btn-dark btn-sm" type="button">Sair</button>
+        </div>
+      </div>
 
-<div id="listaDespesas"></div>
+      <div id="managerKpis" class="kpi-grid"></div>
 
-</div>
+      <div class="panel" style="margin-bottom:14px;">
+        <div class="section-head">
+          <h3>Filtros</h3>
+        </div>
+        <div class="filters">
+          <div class="field" style="margin-bottom:0;">
+            <label>Buscar</label>
+            <input id="managerSearch" type="text" placeholder="Motorista, caminhão, origem ou destino">
+          </div>
+          <div class="field" style="margin-bottom:0;">
+            <label>Status</label>
+            <select id="managerStatusFilter">
+              <option value="">Todos</option>
+              <option value="aberta">Aberta</option>
+              <option value="concluida">Concluída</option>
+              <option value="aprovada">Aprovada</option>
+            </select>
+          </div>
+          <div class="field" style="margin-bottom:0;">
+            <label>Caminhão</label>
+            <select id="managerTruckFilter">
+              <option value="">Todos</option>
+            </select>
+          </div>
+        </div>
+      </div>
 
-</div>
-</div>
+      <div id="managerTripList" class="trip-grid"></div>
+    </section>
 
-<script type="module">
+    <section id="detailScreen" class="screen">
+      <div class="page-head">
+        <div>
+          <h2>Detalhe da viagem</h2>
+          <div class="page-sub">Controle operacional, divergências e fechamento financeiro.</div>
+        </div>
+        <div class="actions-inline">
+          <button id="btnBackDetail" class="btn btn-soft btn-sm" type="button">Voltar</button>
+        </div>
+      </div>
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+      <div class="detail-layout">
+        <div>
+          <div class="panel">
+            <div class="section-head">
+              <div>
+                <h3 id="detailTitle">Viagem</h3>
+                <div class="muted" id="detailSubtitle"></div>
+              </div>
+              <div id="detailStatusWrap"></div>
+            </div>
 
-const firebaseConfig = {
-  apiKey: "AIzaSyA52rHz97hUeTqobqmAbY58NLjkfO5O4jg",
-  authDomain: "transportes-1af13.firebaseapp.com",
-  projectId: "transportes-1af13"
-};
+            <div id="financialBanner"></div>
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+            <div class="summary-grid" id="detailSummaryGrid"></div>
 
-let perfil, viagemAtual, statusAtual, freteAtual;
+            <div class="meta-grid" id="detailMetaGrid"></div>
+          </div>
 
-/* ICONES */
-const icones = {
-  "COMBUSTIVEL":"fa-gas-pump",
-  "PEDAGIO":"fa-road",
-  "MANUTENCAO":"fa-wrench",
-  "BORRACHARIA":"fa-tire",
-  "OLEO":"fa-oil-can",
-  "TRIAGEM":"fa-box",
-  "QUEBRA FRETE":"fa-triangle-exclamation",
-  "ADIANTAMENTO":"fa-money-bill",
-  "COMISSAO":"fa-user"
-};
+          <div class="panel" id="expenseEntryPanel" style="margin-top:18px;">
+            <div class="section-head">
+              <h3>Lançamentos financeiros</h3>
+              <span class="muted" id="expenseEntryHint"></span>
+            </div>
 
-/* LOGIN */
-window.entrarOperador=()=>{perfil="operador";login.style.display="none";operador.classList.remove("hidden");carregarOperador();}
-window.entrarGestor=()=>{if(prompt("Senha")=="1234"){perfil="gestor";login.style.display="none";gestor.classList.remove("hidden");carregarGestor();}}
+            <div class="expense-form">
+              <div class="field" style="margin-bottom:0;">
+                <label>Tipo</label>
+                <select id="expenseType"></select>
+              </div>
+              <div class="field" style="margin-bottom:0;">
+                <label>Valor</label>
+                <input id="expenseValue" type="number" step="0.01" min="0" placeholder="0,00">
+              </div>
+              <button id="btnAddExpense" class="btn btn-primary" type="button" style="height:48px;">Adicionar</button>
+            </div>
 
-/* CRIAR */
-window.criarViagem=async()=>{
-await addDoc(collection(db,"viagens"),{
-motorista: motorista.value,
-origem: origem.value,
-destino: destino.value,
-localCarga: localCarga.value,
-dataCarga: dataCarga.value,
-localDescarga: localDescarga.value,
-dataDescarga: dataDescarga.value,
-frete: Number(frete.value),
-status:"aberta"
-});
-carregarOperador();
-}
+            <div class="actions-inline" style="margin-top:12px;">
+              <button id="btnFinalizeTrip" class="btn btn-dark btn-sm" type="button">Finalizar viagem</button>
+              <button id="btnApproveTrip" class="btn btn-primary btn-sm" type="button">Aprovar viagem</button>
+            </div>
+          </div>
 
-/* TIPOS */
-function carregarTipos(){
-let base=["COMBUSTIVEL","OLEO","TRIAGEM","BORRACHARIA","MANUTENCAO","PEDAGIO","QUEBRA FRETE"];
-let extra=["ADIANTAMENTO","COMISSAO"];
-let lista = perfil==="gestor" ? [...base,...extra] : base;
-tipo.innerHTML = lista.map(x=>`<option>${x}</option>`).join("");
-}
+          <div class="panel" style="margin-top:18px;">
+            <div class="section-head">
+              <h3>Despesas lançadas</h3>
+              <span class="muted" id="expenseListCount">0 item(ns)</span>
+            </div>
+            <div id="expenseList" class="expense-list"></div>
+          </div>
+        </div>
 
-/* LISTAS */
-async function carregarOperador(){
-let snap=await getDocs(collection(db,"viagens"));
-let html="";
-snap.forEach(d=>{
-let v=d.data();
-html+=`<div class="card" onclick="abrir('${d.id}')">
-<b>${v.motorista}</b><br>${v.origem} → ${v.destino}
-</div>`;
-});
-listaOperador.innerHTML=html;
-}
+        <div>
+          <div class="panel">
+            <div class="section-head">
+              <h3>Financeiro consolidado</h3>
+            </div>
+            <div id="breakdownList" class="breakdown-list"></div>
+          </div>
 
-async function carregarGestor(){
-let snap=await getDocs(collection(db,"viagens"));
-let html="";
-for(let d of snap.docs){
-let v=d.data();
-html+=`<div class="card" onclick="abrirGestor('${d.id}')">
-<b>${v.motorista}</b><br>${v.origem} → ${v.destino}
-</div>`;
-}
-dashboard.innerHTML=html;
-}
+          <div class="panel" style="margin-top:18px;">
+            <div class="section-head">
+              <h3>Alertas automáticos</h3>
+            </div>
+            <div id="autoAlerts"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
 
-/* ABRIR */
-window.abrir=async(id)=>{
-viagemAtual=id;
-operador.classList.add("hidden");
-detalhe.classList.remove("hidden");
+  <div id="correctionModalWrap" class="modal-wrap">
+    <div class="modal">
+      <h3>Valor inconsistente</h3>
+      <p>Ajuste o valor lançado pelo motorista. O sistema vai manter o valor original e registrar a divergência.</p>
 
-let snap=await getDocs(collection(db,"viagens"));
-snap.forEach(d=>{
-if(d.id===id){
-let v=d.data();
-titulo.innerText=v.motorista+" - "+v.origem+" → "+v.destino;
-freteAtual=v.frete;
-statusAtual=v.status;
-}
-});
+      <div class="field">
+        <label>Tipo</label>
+        <input id="correctionType" type="text" disabled>
+      </div>
 
-carregarTipos();
-carregarDetalhe();
-}
+      <div class="field">
+        <label>Valor original</label>
+        <input id="correctionOriginal" type="text" disabled>
+      </div>
 
-window.abrirGestor=async(id)=>{gestor.classList.add("hidden");await abrir(id);}
+      <div class="field">
+        <label>Valor corrigido</label>
+        <input id="correctionNewValue" type="number" step="0.01" min="0" placeholder="Digite o valor correto">
+      </div>
 
-/* DETALHE */
-async function carregarDetalhe(){
-let snap=await getDocs(collection(db,"viagens",viagemAtual,"despesas"));
-let html="",total=0;
+      <div class="field">
+        <label>Motivo da divergência</label>
+        <textarea id="correctionReason" placeholder="Ex.: recibo divergente, erro de digitação, valor duplicado..."></textarea>
+      </div>
 
-snap.forEach(d=>{
-let tipo=d.data().tipo;
-html+=`
-<div class="card despesa">
-<i class="fa ${icones[tipo] || 'fa-circle'}"></i>
-<div>${tipo} - R$ ${d.data().valor}</div>
-</div>`;
-total+=d.data().valor;
-});
+      <div class="modal-actions">
+        <button id="btnCancelCorrection" class="btn btn-soft btn-sm" type="button">Cancelar</button>
+        <button id="btnSaveCorrection" class="btn btn-warning btn-sm" type="button">Salvar divergência</button>
+      </div>
+    </div>
+  </div>
 
-listaDespesas.innerHTML=html;
-resumo.innerHTML=`Frete: ${freteAtual}<br>Despesa: ${total}<br>Lucro: ${freteAtual-total}`;
+  <div id="toast" class="toast"></div>
 
-if(statusAtual==="concluida" && perfil==="gestor"){
-btnAprovar.innerHTML=`<button onclick="aprovarAtual()">Aprovar</button>`;
-}else{
-btnAprovar.innerHTML="";
-}
-}
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      getDocs,
+      getDoc,
+      doc,
+      updateDoc
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* ADD */
-window.addDespesa=async()=>{
-if(Number(valor.value)<=0){alert("Valor inválido");return;}
-await addDoc(collection(db,"viagens",viagemAtual,"despesas"),{
-tipo: tipo.value,
-valor: Number(valor.value)
-});
-carregarDetalhe();
-}
+    const firebaseConfig = {
+      apiKey: "AIzaSyA52rHz97hUeTqobqmAbY58NLjkfO5O4jg",
+      authDomain: "transportes-1af13.firebaseapp.com",
+      projectId: "transportes-1af13"
+    };
 
-/* FINALIZAR */
-window.finalizar=async()=>{
-await updateDoc(doc(db,"viagens",viagemAtual),{status:"concluida"});
-voltar();
-}
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-/* APROVAR */
-window.aprovarAtual=async()=>{
-await updateDoc(doc(db,"viagens",viagemAtual),{status:"aprovada"});
-voltar();
-}
+    const els = {
+      roleScreen: document.getElementById("roleScreen"),
+      operatorScreen: document.getElementById("operatorScreen"),
+      managerScreen: document.getElementById("managerScreen"),
+      detailScreen: document.getElementById("detailScreen"),
+      profilePill: document.getElementById("profilePill"),
 
-/* VOLTAR */
-window.voltar=()=>{
-detalhe.classList.add("hidden");
-if(perfil==="gestor"){gestor.classList.remove("hidden");carregarGestor();}
-else{operador.classList.remove("hidden");carregarOperador();}
-}
+      btnEntryOperator: document.getElementById("btnEntryOperator"),
+      btnEntryManager: document.getElementById("btnEntryManager"),
+      btnRefreshOperator: document.getElementById("btnRefreshOperator"),
+      btnLogoutOperator: document.getElementById("btnLogoutOperator"),
+      btnRefreshManager: document.getElementById("btnRefreshManager"),
+      btnLogoutManager: document.getElementById("btnLogoutManager"),
+      btnBackDetail: document.getElementById("btnBackDetail"),
 
-</script>
+      tripDriver: document.getElementById("tripDriver"),
+      tripTruck: document.getElementById("tripTruck"),
+      tripOriginCity: document.getElementById("tripOriginCity"),
+      tripDestCity: document.getElementById("tripDestCity"),
+      tripLoadLocation: document.getElementById("tripLoadLocation"),
+      tripLoadDateTime: document.getElementById("tripLoadDateTime"),
+      tripUnloadLocation: document.getElementById("tripUnloadLocation"),
+      tripUnloadDateTime: document.getElementById("tripUnloadDateTime"),
+      tripFreight: document.getElementById("tripFreight"),
+      btnCreateTrip: document.getElementById("btnCreateTrip"),
 
-</body>
-</html>
+      operatorTripList: document.getElementById("operatorTripList"),
+      operatorTripCount: document.getElementById("operatorTripCount"),
+
+      managerKpis: document.getElementById("managerKpis"),
+      managerSearch: document.getElementById("managerSearch"),
+      managerStatusFilter: document.getElementById("managerStatusFilter"),
+      managerTruckFilter: document.getElementById("managerTruckFilter"),
+      managerTripList: document.getElementById("managerTripList"),
+
+      detailTitle: document.getElementById("detailTitle"),
+      detailSubtitle: document.getElementById("detailSubtitle"),
+      detailStatusWrap: document.getElementById("detailStatusWrap"),
+      financialBanner: document.getElementById("financialBanner"),
+      detailSummaryGrid: document.getElementById("detailSummaryGrid"),
+      detailMetaGrid: document.getElementById("detailMetaGrid"),
+      expenseEntryPanel: document.getElementById("expenseEntryPanel"),
+      expenseEntryHint: document.getElementById("expenseEntryHint"),
+      expenseType: document.getElementById("expenseType"),
+      expenseValue: document.getElementById("expenseValue"),
+      btnAddExpense: document.getElementById("btnAddExpense"),
+      btnFinalizeTrip: document.getElementById("btnFinalizeTrip"),
+      btnApproveTrip: document.getElementById("btnApproveTrip"),
+      expenseListCount: document.getElementById("expenseListCount"),
+      expenseList: document.getElementById("expenseList"),
+      breakdownList:
