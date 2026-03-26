@@ -182,12 +182,6 @@
       flex:1;
     }
 
-    .btn-danger{
-      background:linear-gradient(180deg,#ef4444,#dc2626);
-      color:#fff;
-      flex:1;
-    }
-
     .btn-outline{
       background:#fff;
       color:var(--primary-dark);
@@ -327,12 +321,6 @@
       background:rgba(245,158,11,.12);
       color:#92400e;
       border:1px solid rgba(245,158,11,.16);
-    }
-
-    .alert-danger{
-      background:rgba(220,38,38,.09);
-      color:#991b1b;
-      border:1px solid rgba(220,38,38,.14);
     }
 
     .expense-item{
@@ -507,13 +495,8 @@
       color:#fff;
     }
 
-    .tab-content.hidden{
-      display:none;
-    }
-
-    .tab-content.active{
-      display:block;
-    }
+    .tab-content.hidden{ display:none; }
+    .tab-content.active{ display:block; }
 
     .cad-item{
       display:flex;
@@ -870,9 +853,7 @@
       getDocs,
       getDoc,
       updateDoc,
-      doc,
-      query,
-      orderBy
+      doc
     } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -1199,14 +1180,6 @@
       `).join("");
     }
 
-    function calculateExpenseTotal(despesas) {
-      return despesas.reduce((acc, d) => acc + Number(d.valor || 0), 0);
-    }
-
-    function countDivergences(despesas) {
-      return despesas.filter((d) => d.corrigido === true).length;
-    }
-
     function renderTripCards(viagens) {
       if (!viagens.length) {
         return `<div class="empty">Nenhuma viagem cadastrada ainda.</div>`;
@@ -1224,8 +1197,8 @@
           </div>
           <div class="trip-money">
             <div><span class="pill ${getStatusClass(v.status)}">${getStatusLabel(v.status)}</span></div>
-            <div class="money-label" style="margin-top:10px;">Frete</div>
-            <div class="money-value">${formatCurrency(v.frete)}</div>
+            <div class="money-label" style="margin-top:10px;">Resultado</div>
+            <div class="money-value ${Number(v.resultadoAtual || 0) >= 0 ? "positive" : "negative"}">${formatCurrency(v.resultadoAtual || 0)}</div>
           </div>
         </div>
       `).join("");
@@ -1247,28 +1220,15 @@
 
     async function loadManagerScreen() {
       const viagens = await fetchTrips();
-      let total = viagens.length;
-      let abertas = 0;
-      let concluidas = 0;
-      let aprovadas = 0;
-      let freteTotal = 0;
-      let despesaTotal = 0;
-      let lucroTotal = 0;
-      let divergenciasTotais = 0;
 
-      for (const viagem of viagens) {
-        const despesas = await fetchExpenses(viagem.id);
-        const totalDesp = calculateExpenseTotal(despesas);
-
-        freteTotal += Number(viagem.frete || 0);
-        despesaTotal += totalDesp;
-        lucroTotal += Number(viagem.frete || 0) - totalDesp;
-        divergenciasTotais += countDivergences(despesas);
-
-        if (viagem.status === "aberta") abertas++;
-        if (viagem.status === "concluida") concluidas++;
-        if (viagem.status === "aprovada") aprovadas++;
-      }
+      const total = viagens.length;
+      const abertas = viagens.filter(v => v.status === "aberta").length;
+      const concluidas = viagens.filter(v => v.status === "concluida").length;
+      const aprovadas = viagens.filter(v => v.status === "aprovada").length;
+      const freteTotal = viagens.reduce((acc, v) => acc + Number(v.frete || 0), 0);
+      const despesaTotal = viagens.reduce((acc, v) => acc + Number(v.totalDespesas || 0), 0);
+      const lucroTotal = viagens.reduce((acc, v) => acc + Number(v.resultadoAtual || 0), 0);
+      const divergenciasTotais = viagens.reduce((acc, v) => acc + Number(v.totalDivergencias || 0), 0);
 
       el.kpiTotal.textContent = total;
       el.kpiAbertas.textContent = abertas;
@@ -1304,28 +1264,22 @@
       const labels = Object.keys(porCaminhao);
       const values = Object.values(porCaminhao);
 
-      if (chartCaminhoes) {
-        chartCaminhoes.destroy();
-      }
+      if (chartCaminhoes) chartCaminhoes.destroy();
 
       chartCaminhoes = new Chart(el.chartCaminhoes, {
         type: "bar",
         data: {
           labels,
-          datasets: [
-            {
-              label: "Viagens por caminhão",
-              data: values,
-              borderWidth: 1,
-              borderRadius: 10
-            }
-          ]
+          datasets: [{
+            label: "Viagens por caminhão",
+            data: values,
+            borderWidth: 1,
+            borderRadius: 10
+          }]
         },
         options: {
           responsive: true,
-          plugins: {
-            legend: { display: false }
-          },
+          plugins: { legend: { display: false } },
           scales: {
             y: {
               beginAtZero: true,
@@ -1359,9 +1313,9 @@
     function renderDetail() {
       const viagem = state.viagem;
       const despesas = state.despesas;
-      const totalDespesa = calculateExpenseTotal(despesas);
-      const lucro = Number(viagem.frete || 0) - totalDespesa;
-      const divergencias = countDivergences(despesas);
+      const totalDespesa = Number(viagem.totalDespesas || 0);
+      const lucro = Number(viagem.resultadoAtual || 0);
+      const divergencias = Number(viagem.totalDivergencias || 0);
 
       el.tituloViagem.textContent = `${viagem.motoristaNome || "-"} · ${viagem.origem || "-"} → ${viagem.destino || "-"}`;
       el.subtituloViagem.innerHTML = `
@@ -1376,6 +1330,7 @@
         <div class="summary-row"><span>Frete</span><strong>${formatCurrency(viagem.frete)}</strong></div>
         <div class="summary-row"><span>Total de despesas</span><strong>${formatCurrency(totalDespesa)}</strong></div>
         <div class="summary-row"><span>Resultado</span><strong class="${lucro >= 0 ? "positive" : "negative"}">${formatCurrency(lucro)}</strong></div>
+        <div class="summary-row"><span>Qtd. despesas</span><strong>${Number(viagem.qtdDespesas || 0)}</strong></div>
         <div class="summary-row"><span>Divergências corrigidas</span><strong>${divergencias}</strong></div>
       `;
 
@@ -1575,6 +1530,8 @@
         return;
       }
 
+      const frete = Number(el.frete.value || 0);
+
       const payload = {
         motoristaId,
         motoristaNome: motorista.nome,
@@ -1586,8 +1543,12 @@
         dataCarga: el.dataCarga.value,
         localDescarga: el.localDescarga.value.trim(),
         dataDescarga: el.dataDescarga.value,
-        frete: Number(el.frete.value || 0),
+        frete,
         status: "aberta",
+        totalDespesas: 0,
+        totalDivergencias: 0,
+        qtdDespesas: 0,
+        resultadoAtual: frete,
         criadoEm: Date.now()
       };
 
@@ -1657,6 +1618,16 @@
         criadoEm: Date.now()
       });
 
+      const novoTotalDespesas = Number(state.viagem.totalDespesas || 0) + valor;
+      const novaQtdDespesas = Number(state.viagem.qtdDespesas || 0) + 1;
+      const novoResultado = Number(state.viagem.frete || 0) - novoTotalDespesas;
+
+      await updateDoc(doc(db, "viagens", state.viagemId), {
+        totalDespesas: novoTotalDespesas,
+        qtdDespesas: novaQtdDespesas,
+        resultadoAtual: novoResultado
+      });
+
       el.valorDespesa.value = "";
       limparCupomAtual();
 
@@ -1710,11 +1681,21 @@
       const motivo = prompt("Digite o motivo da divergência:", despesa.motivoCorrecao || "");
       if (motivo === null) return;
 
+      const valorAnterior = Number(despesa.valor || 0);
+      const diferenca = novoValor - valorAnterior;
+      const incrementarDivergencia = despesa.corrigido ? 0 : 1;
+
       await updateDoc(doc(db, "viagens", state.viagemId, "despesas", despesaId), {
         valor: novoValor,
         valorOriginal: Number(despesa.valorOriginal ?? despesa.valor ?? 0),
         corrigido: true,
         motivoCorrecao: motivo.trim()
+      });
+
+      await updateDoc(doc(db, "viagens", state.viagemId), {
+        totalDespesas: Number(state.viagem.totalDespesas || 0) + diferenca,
+        totalDivergencias: Number(state.viagem.totalDivergencias || 0) + incrementarDivergencia,
+        resultadoAtual: Number(state.viagem.resultadoAtual || 0) - diferenca
       });
 
       await refreshCurrentTrip();
