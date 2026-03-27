@@ -231,6 +231,11 @@
       color:#166534;
     }
 
+    .status-cancelada{
+      background:rgba(220,38,38,.12);
+      color:#991b1b;
+    }
+
     .kpi{
       background:linear-gradient(180deg,#ffffff,#f8fbff);
       border:1px solid #e0f2fe;
@@ -736,6 +741,18 @@
       </div>
 
       <div class="card">
+        <h3 class="section-title">Filtro do Gestor</h3>
+        <label for="managerStatusFilter">Status</label>
+        <select id="managerStatusFilter" onchange="window.filtrarGestor()">
+          <option value="todos">Todos</option>
+          <option value="aberta">Em andamento</option>
+          <option value="concluida">Aguardando aprovação</option>
+          <option value="aprovada">Aprovada</option>
+          <option value="cancelada">Cancelada</option>
+        </select>
+      </div>
+
+      <div class="card">
         <h3 class="section-title">Viagens do Gestor</h3>
         <div id="listaGestor"></div>
       </div>
@@ -962,6 +979,7 @@
       kpiDespesa: document.getElementById("kpiDespesa"),
       kpiLucro: document.getElementById("kpiLucro"),
       alertaFinanceiroPainel: document.getElementById("alertaFinanceiroPainel"),
+      managerStatusFilter: document.getElementById("managerStatusFilter"),
 
       repMotoristas: document.getElementById("repMotoristas"),
       repCaminhoes: document.getElementById("repCaminhoes"),
@@ -1021,6 +1039,7 @@
       if (status === "aberta") return "status-aberta";
       if (status === "concluida") return "status-concluida";
       if (status === "aprovada") return "status-aprovada";
+      if (status === "cancelada") return "status-cancelada";
       return "status-aberta";
     }
 
@@ -1028,6 +1047,7 @@
       if (status === "aberta") return "Em andamento";
       if (status === "concluida") return "Aguardando aprovação";
       if (status === "aprovada") return "Aprovada";
+      if (status === "cancelada") return "Cancelada";
       return status || "-";
     }
 
@@ -1242,8 +1262,17 @@
         ? `<div class="alert-box alert-warning"><i class="fa-solid fa-triangle-exclamation"></i> Foram registradas ${divergenciasTotais} divergência(s) corrigida(s).</div>`
         : `<div class="alert-box alert-info"><i class="fa-solid fa-circle-check"></i> Nenhuma divergência financeira registrada.</div>`;
 
-      el.listaGestor.innerHTML = renderTripCards(viagens);
+      const filtro = el.managerStatusFilter ? el.managerStatusFilter.value : "todos";
+      const viagensFiltradas = filtro === "todos"
+        ? viagens
+        : viagens.filter(v => v.status === filtro);
+
+      el.listaGestor.innerHTML = renderTripCards(viagensFiltradas);
     }
+
+    window.filtrarGestor = async function () {
+      await loadManagerScreen();
+    };
 
     async function loadReportsScreen() {
       const viagens = await fetchTrips();
@@ -1343,12 +1372,19 @@
 
       if (viagem.status === "aprovada") {
         alertas += `<div class="alert-box alert-info"><i class="fa-solid fa-badge-check"></i> Viagem já aprovada.</div>`;
+        if (state.perfil === "gestor") {
+          alertas += `<div class="toolbar"><button type="button" class="btn btn-warning" onclick="window.cancelarViagem()"><i class="fa-solid fa-ban"></i> Cancelar viagem</button></div>`;
+        }
+      }
+
+      if (viagem.status === "cancelada") {
+        alertas += `<div class="alert-box alert-warning"><i class="fa-solid fa-ban"></i> Esta viagem foi cancelada.</div>`;
       }
 
       el.alertasViagem.innerHTML = alertas;
 
       const operadorPodeLancar = state.perfil === "operador" && viagem.status === "aberta";
-      const gestorPodeLancar = state.perfil === "gestor" && viagem.status !== "aprovada";
+      const gestorPodeLancar = state.perfil === "gestor" && viagem.status !== "aprovada" && viagem.status !== "cancelada";
       const podeLancar = operadorPodeLancar || gestorPodeLancar;
 
       el.notaLancamento.textContent = state.perfil === "gestor"
@@ -1723,6 +1759,31 @@
       await refreshCurrentTrip();
       renderDetail();
       toast("Viagem aprovada com sucesso.");
+    };
+
+    window.cancelarViagem = async function () {
+      if (state.perfil !== "gestor") {
+        toast("Somente o gestor pode cancelar viagens.");
+        return;
+      }
+
+      if (!state.viagem || !state.viagemId) return;
+
+      if (state.viagem.status !== "aprovada") {
+        toast("Somente viagens aprovadas podem ser canceladas por aqui.");
+        return;
+      }
+
+      const confirmar = confirm("Tem certeza que deseja cancelar esta viagem?");
+      if (!confirmar) return;
+
+      await updateDoc(doc(db, "viagens", state.viagemId), {
+        status: "cancelada"
+      });
+
+      await refreshCurrentTrip();
+      renderDetail();
+      toast("Viagem cancelada com sucesso.");
     };
 
     window.voltarDaViagem = async function () {
