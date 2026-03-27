@@ -870,6 +870,7 @@
       getDocs,
       getDoc,
       updateDoc,
+      deleteDoc,
       doc
     } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -1180,6 +1181,9 @@
             <div class="cad-title">${m.nome}</div>
             <div class="subtle">${m.telefone || "-"}</div>
           </div>
+          <button type="button" class="mini-btn mini-warning" onclick="window.excluirMotorista('${m.id}')">
+            <i class="fa-solid fa-trash"></i> Excluir
+          </button>
         </div>
       `).join("");
     }
@@ -1195,6 +1199,35 @@
           <div>
             <div class="cad-title">${c.modelo} - ${c.placa}</div>
             <div class="subtle">${c.descricao || "-"}</div>
+          </div>
+          <button type="button" class="mini-btn mini-warning" onclick="window.excluirCaminhao('${c.id}')">
+            <i class="fa-solid fa-trash"></i> Excluir
+          </button>
+        </div>
+      `).join("");
+    }
+
+    function renderTripCardsOperator(viagens) {
+      if (!viagens.length) {
+        return `<div class="empty">Nenhuma viagem cadastrada ainda.</div>`;
+      }
+
+      return viagens.map((v) => `
+        <div class="card trip-card" onclick="window.abrirViagem('${v.id}')">
+          <div class="trip-main">
+            <div class="trip-title">${v.motoristaNome || "-"} · ${v.origem || "-"} → ${v.destino || "-"}</div>
+            <div class="trip-meta">
+              Caminhão: ${v.caminhaoNome || "-"}<br>
+              Carga: ${v.localCarga || "-"} · ${formatDateTime(v.dataCarga)}<br>
+              Descarga: ${v.localDescarga || "-"} · ${formatDateTime(v.dataDescarga)}
+            </div>
+          </div>
+          <div class="trip-money">
+            <div><span class="pill ${getStatusClass(v.status)}">${getStatusLabel(v.status)}</span></div>
+            <div class="money-label" style="margin-top:10px;">Frete</div>
+            <div class="money-value">${formatCurrency(v.frete || 0)}</div>
+            <div class="money-label" style="margin-top:8px;">Gasto</div>
+            <div class="money-value negative">${formatCurrency(v.totalDespesas || 0)}</div>
           </div>
         </div>
       `).join("");
@@ -1235,7 +1268,7 @@
     async function loadOperatorScreen() {
       await reloadMasterData();
       const viagens = await fetchTrips();
-      el.listaOperador.innerHTML = renderTripCards(viagens);
+      el.listaOperador.innerHTML = renderTripCardsOperator(viagens);
     }
 
     async function loadManagerScreen() {
@@ -1547,6 +1580,24 @@
       limparFormularioCaminhao();
       await reloadMasterData();
       toast("Caminhão salvo com sucesso.");
+    };
+
+    window.excluirMotorista = async function (id) {
+      const confirmar = confirm("Deseja realmente excluir este motorista?");
+      if (!confirmar) return;
+
+      await deleteDoc(doc(db, "motoristas", id));
+      await reloadMasterData();
+      toast("Motorista excluído com sucesso.");
+    };
+
+    window.excluirCaminhao = async function (id) {
+      const confirmar = confirm("Deseja realmente excluir este caminhão?");
+      if (!confirmar) return;
+
+      await deleteDoc(doc(db, "caminhoes", id));
+      await reloadMasterData();
+      toast("Caminhão excluído com sucesso.");
     };
 
     window.criarViagem = async function () {
